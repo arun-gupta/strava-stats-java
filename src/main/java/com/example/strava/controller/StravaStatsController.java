@@ -43,25 +43,25 @@ public class StravaStatsController {
         return stravaStatsService.getTimeDistribution(activities);
     }
 
-    @GetMapping("/workout-streaks")
-    public List<HeatmapDataDto> getWorkoutStreaks(
+    @GetMapping("/workout-heatmap")
+    public List<HeatmapDataDto> getWorkoutHeatmap(
             @AuthenticationPrincipal OAuth2User principal,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
-        return stravaStatsService.getWorkoutStreaksHeatmap(activities);
+        return stravaStatsService.getWorkoutHeatmapData(activities);
     }
 
-    @GetMapping("/workout-streaks/summary")
-    public WorkoutStreakDto getWorkoutStreakSummary(
+    @GetMapping("/workout-heatmap/summary")
+    public WorkoutHeatmapDto getWorkoutHeatmapSummary(
             @AuthenticationPrincipal OAuth2User principal,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         LocalDate reference = (before != null) ? before : LocalDate.now();
-        return stravaStatsService.getWorkoutStreakSummary(activities, reference);
+        return stravaStatsService.getWorkoutHeatmapSummary(activities, reference);
     }
 
     @GetMapping("/run-statistics")
@@ -72,6 +72,16 @@ public class StravaStatsController {
 
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getRunStatistics(activities);
+    }
+
+    @GetMapping("/run-distribution")
+    public List<RunDistributionDto> getRunDistribution(
+            @AuthenticationPrincipal OAuth2User principal,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
+
+        List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
+        return stravaStatsService.getRunDistribution(activities);
     }
 
     @GetMapping("/running-heatmap")

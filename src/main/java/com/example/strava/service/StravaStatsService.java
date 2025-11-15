@@ -58,7 +58,7 @@ public class StravaStatsService {
                 .collect(Collectors.toList());
     }
 
-    public List<HeatmapDataDto> getWorkoutStreaksHeatmap(List<StravaActivity> activities) {
+    public List<HeatmapDataDto> getWorkoutHeatmapData(List<StravaActivity> activities) {
         Map<LocalDate, Double> dailyHours = activities.stream()
                 .collect(Collectors.groupingBy(
                         a -> a.getStartDateLocal().toLocalDate(),
@@ -75,18 +75,25 @@ public class StravaStatsService {
                 .collect(Collectors.toList());
     }
 
-    public WorkoutStreakDto getWorkoutStreakSummary(List<StravaActivity> activities, LocalDate referenceDate) {
+    public WorkoutHeatmapDto getWorkoutHeatmapSummary(List<StravaActivity> activities, LocalDate referenceDate) {
         if (referenceDate == null) referenceDate = LocalDate.now();
 
         // Build a sorted unique set of dates with any activity
-        SortedSet<LocalDate> activityDates = activities.stream()
+        final NavigableSet<LocalDate> activityDates = activities.stream()
                 .map(a -> a.getStartDateLocal().toLocalDate())
                 .collect(Collectors.toCollection(TreeSet::new));
 
         if (activityDates.isEmpty()) {
-            return WorkoutStreakDto.builder()
+            return WorkoutHeatmapDto.builder()
                     .currentStreak(0)
                     .longestStreak(0)
+                    .workoutDays(0)
+                    .missedDays(0)
+                    .daysSinceLast(referenceDate != null ? 0 : 0)
+                    .longestGap(0)
+                    .totalGapDays(0)
+                    .rangeStart(referenceDate)
+                    .rangeEnd(referenceDate)
                     .build();
         }
 
@@ -119,11 +126,59 @@ public class StravaStatsService {
             prev = d;
         }
 
-        return WorkoutStreakDto.builder()
+        // Determine range for metrics/timeline
+        LocalDate rangeStart = activityDates.first();
+        LocalDate rangeEnd = referenceDate;
+        if (rangeEnd.isBefore(rangeStart)) {
+            // fallback to at least cover the reference day
+            rangeStart = rangeEnd;
+        }
+
+        // Count workout days within the range
+        int workoutDays = 0;
+        for (LocalDate d : activityDates) {
+            if (!d.isBefore(rangeStart) && !d.isAfter(rangeEnd)) {
+                workoutDays++;
+            }
+        }
+
+        int totalDays = (int) (ChronoUnit.DAYS.between(rangeStart, rangeEnd) + 1);
+        int missedDays = Math.max(totalDays - workoutDays, 0);
+
+        // Days since last activity up to rangeEnd
+        NavigableSet<LocalDate> uptoEnd = activityDates.headSet(rangeEnd, true);
+        LocalDate lastActivityOnOrBeforeEnd = uptoEnd.isEmpty()
+                ? null
+                : uptoEnd.last();
+        int daysSinceLast = lastActivityOnOrBeforeEnd == null ? totalDays
+                : (int) ChronoUnit.DAYS.between(lastActivityOnOrBeforeEnd, rangeEnd);
+
+        // Compute gaps inside the range
+        int longestGap = 0;
+        int totalGapDays = 0;
+        int currentGap = 0;
+        for (LocalDate day = rangeStart; !day.isAfter(rangeEnd); day = day.plusDays(1)) {
+            if (!activityDates.contains(day)) {
+                currentGap++;
+                totalGapDays++;
+                if (currentGap > longestGap) longestGap = currentGap;
+            } else {
+                currentGap = 0;
+            }
+        }
+
+        return WorkoutHeatmapDto.builder()
                 .currentStreak(current)
                 .longestStreak(longest)
                 .longestStreakStart(longestStart)
                 .longestStreakEnd(longestEnd)
+                .workoutDays(workoutDays)
+                .missedDays(missedDays)
+                .daysSinceLast(daysSinceLast)
+                .longestGap(longestGap)
+                .totalGapDays(totalGapDays)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
                 .build();
     }
 
@@ -192,6 +247,36 @@ public class StravaStatsService {
                 .longestRun(Math.round(longestRun * 100.0) / 100.0)
                 .mostElevation(Math.round(mostElevation))
                 .build();
+    }
+
+    public List<RunDistributionDto> getRunDistribution(List<StravaActivity> activities) {
+        List<StravaActivity> runs = activities.stream()
+                .filter(a -> "Run".equalsIgnoreCase(a.getType()) ||
+                           (a.getSportType() != null && a.getSportType().toLowerCase().contains("run")))
+                .collect(Collectors.toList());
+
+        // Define distance ranges in miles
+        String[] ranges = {"0-1", "1-2", "2-3", "3-4", "4-5", "5-6", "6-7", "7-8", "8-9", "9-10"};
+        Map<String, Long> distribution = new LinkedHashMap<>();
+        for (String range : ranges) {
+            distribution.put(range, 0L);
+        }
+
+        // Count runs in each range
+        for (StravaActivity run : runs) {
+            if (run.getDistance() != null) {
+                double miles = run.getDistance() * METERS_TO_MILES;
+                int bucket = (int) miles; // floor to get the range
+                if (bucket >= 0 && bucket < 10) {
+                    String range = bucket + "-" + (bucket + 1);
+                    distribution.put(range, distribution.getOrDefault(range, 0L) + 1);
+                }
+            }
+        }
+
+        return distribution.entrySet().stream()
+                .map(entry -> new RunDistributionDto(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     public List<HeatmapDataDto> getRunningHeatmap(List<StravaActivity> activities) {

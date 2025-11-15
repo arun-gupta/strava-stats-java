@@ -18,6 +18,47 @@
             width: 100% !important; /* let the container control actual width */
             height: auto !important;
         }
+        /* Workout heatmap timeline */
+        .timeline-wrapper {
+            border: 1px solid #eee;
+            border-radius: .5rem;
+            padding: .5rem .75rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            background: #fff;
+        }
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(14px, 14px));
+            gap: 3px;
+            max-width: 100%;
+            border: 1px solid #eee;
+            border-radius: .5rem;
+            padding: .75rem;
+            background: #fff;
+            justify-content: start;
+        }
+        .day-box {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            margin: 2px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .day-cell {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .lvl-0 { background: #f2f2f2; }
+        .lvl-1 { background: #ffe0b2; } /* < 1h or < 3mi */
+        .lvl-2 { background: #ffb74d; } /* 1h - 2h or 3-6mi */
+        .lvl-3 { background: #fb8c00; } /* 2h+ or 6-10mi */
+        .lvl-4 { background: #e65100; } /* 10mi+ */
+        .legend-item { display: inline-flex; align-items: center; margin-right: 12px; }
+        .legend-swatch { width: 14px; height: 14px; border-radius:3px; display:inline-block; margin-right:6px; border:1px solid rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -53,6 +94,14 @@
                                 <button class="btn btn-primary d-block" onclick="loadAllData()">Apply Filter</button>
                             </div>
                         </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div id="dateRangeDisplay" class="alert alert-info mb-0" style="display:none;">
+                                    <strong>Current Range:</strong> <span id="displayStartDate"></span> to <span id="displayEndDate"></span>
+                                    (<span id="displayTotalDays"></span> days)
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -73,9 +122,9 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="workout-streaks-tab" data-bs-toggle="tab"
-                        data-bs-target="#workout-streaks" type="button" role="tab">
-                    Workout Streaks
+                <button class="nav-link" id="workout-heatmap-tab" data-bs-toggle="tab"
+                        data-bs-target="#workout-heatmap" type="button" role="tab">
+                    Workout Heatmap
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -130,26 +179,62 @@
                 </div>
             </div>
 
-            <!-- Workout Streaks -->
-            <div class="tab-pane fade" id="workout-streaks" role="tabpanel">
+            <!-- Workout Heatmap -->
+            <div class="tab-pane fade" id="workout-heatmap" role="tabpanel">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Workout Streaks Heatmap</h5>
-                        <div id="streakSummary" class="mb-3">
-                            <span class="badge bg-success me-2">Current Streak: <span id="currentStreak">0</span> days</span>
-                            <span class="badge bg-primary">Longest Streak: <span id="longestStreak">0</span> days <small class="text-light-50" id="longestStreakDates"></small></span>
+                        <h5 class="card-title">Workout Heatmap</h5>
+                        <p class="text-muted small mb-2">This view tracks all your activities (running, cycling, workouts, etc.), showing your consistency across all workout types. It measures consecutive days with at least one activity.</p>
+                        <div class="d-flex justify-content-end align-items-center small text-muted mb-2">
+                            <div class="legend-item"><span class="legend-swatch lvl-0"></span>No Activity</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-1"></span>< 1h</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-2"></span>1–2h</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-3"></span>2h+</div>
                         </div>
-                        <div id="workoutStreaksHeatmap"></div>
+                        <div id="workoutTimeline" class="heatmap-grid mb-3"></div>
+                        <div class="row text-center" id="streakCounters">
+                            <div class="col-6 col-md-2 mb-2">
+                                <div class="h3 mb-0" id="workoutDays">0</div>
+                                <div class="text-muted small">Workout Days</div>
+                            </div>
+                            <div class="col-6 col-md-2 mb-2">
+                                <div class="h3 mb-0" id="missedDays">0</div>
+                                <div class="text-muted small">Missed Days</div>
+                            </div>
+                            <div class="col-6 col-md-2 mb-2">
+                                <div class="h3 mb-0" id="currentStreak">0</div>
+                                <div class="text-muted small">Current Streak</div>
+                            </div>
+                            <div class="col-6 col-md-2 mb-2">
+                                <div class="h3 mb-0" id="daysSinceLast">0</div>
+                                <div class="text-muted small">Days Since Last</div>
+                            </div>
+                            <div class="col-6 col-md-2 mb-2">
+                                <div class="h3 mb-0" id="longestGap">0</div>
+                                <div class="text-muted small">Longest Gap</div>
+                            </div>
+                            <div class="col-6 col-md-2 mb-2">
+                                <div class="h3 mb-0" id="totalGapDays">0</div>
+                                <div class="text-muted small">Total Gap Days</div>
+                            </div>
+                        </div>
+                        <p class="mt-2" id="consistencyMsg"></p>
                     </div>
                 </div>
             </div>
 
             <!-- Run Statistics -->
             <div class="tab-pane fade" id="run-stats" role="tabpanel">
-                <div class="card">
+                <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="card-title">Running Statistics</h5>
                         <div id="runStatsContent" class="row"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Run Distance Distribution (miles)</h5>
+                        <canvas id="runDistributionChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -159,7 +244,15 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Running Heatmap</h5>
-                        <div id="runningHeatmap"></div>
+                        <p class="text-muted small mb-2">This view tracks your running activities, showing daily mileage with color-coded intensity.</p>
+                        <div class="d-flex justify-content-end align-items-center small text-muted mb-2">
+                            <div class="legend-item"><span class="legend-swatch lvl-0"></span>No Run</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-1"></span>< 3mi</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-2"></span>3–6mi</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-3"></span>6–10mi</div>
+                            <div class="legend-item"><span class="legend-swatch" style="background:#e65100;border:1px solid rgba(0,0,0,0.05);"></span>10mi+</div>
+                        </div>
+                        <div id="runningHeatmap" class="heatmap-grid"></div>
                     </div>
                 </div>
             </div>
@@ -198,7 +291,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let activityCountChart, timeDistChart, mileageTrendChart, paceTrendChart;
+        let activityCountChart, timeDistChart, mileageTrendChart, paceTrendChart, runDistributionChart;
 
         function getDateParams() {
             const after = document.getElementById('afterDate').value;
@@ -304,26 +397,76 @@
                 });
         }
 
-        function loadWorkoutStreaks() {
-            // Load heatmap data (placeholder visualization)
-            fetch('/api/stats/workout-streaks' + getDateParams())
-                .then(response => response.json())
-                .then(data => {
-                    const container = document.getElementById('workoutStreaksHeatmap');
-                    container.innerHTML = '<p class="text-muted">Heatmap visualization - ' + data.length + ' days of activity</p>';
-                });
+        function loadWorkoutHeatmap() {
+            const params = getDateParams();
+            const heatReq = fetch('/api/stats/workout-heatmap' + params).then(r => r.json());
+            const sumReq = fetch('/api/stats/workout-heatmap/summary' + params).then(r => r.json());
+            Promise.all([heatReq, sumReq]).then(([heat, s]) => {
+                // Counters
+                const setNum = (id, val) => document.getElementById(id).innerText = (val ?? 0);
+                setNum('workoutDays', s.workoutDays);
+                setNum('missedDays', s.missedDays);
+                setNum('currentStreak', s.currentStreak);
+                setNum('daysSinceLast', s.daysSinceLast);
+                setNum('longestGap', s.longestGap);
+                setNum('totalGapDays', s.totalGapDays);
 
-            // Load streak summary numbers
-            fetch('/api/stats/workout-streaks/summary' + getDateParams())
-                .then(r => r.json())
-                .then(s => {
-                    document.getElementById('currentStreak').innerText = s.currentStreak ?? 0;
-                    document.getElementById('longestStreak').innerText = s.longestStreak ?? 0;
-                    const dates = (s.longestStreakStart && s.longestStreakEnd)
-                        ? `(${s.longestStreakStart} → ${s.longestStreakEnd})`
-                        : '';
-                    document.getElementById('longestStreakDates').innerText = dates;
-                });
+                // Message
+                const msg = document.getElementById('consistencyMsg');
+                if ((s.missedDays ?? 0) === 0) {
+                    msg.className = 'text-success';
+                    msg.textContent = 'No gaps — excellent consistency!';
+                } else if ((s.currentStreak ?? 0) >= 7) {
+                    msg.className = 'text-success';
+                    msg.textContent = 'Great job keeping a strong streak going!';
+                } else {
+                    msg.className = 'text-muted';
+                    msg.textContent = 'Keep building your routine — every day counts.';
+                }
+
+                // Build timeline
+                const byDate = new Map(heat.map(h => [h.date, h.value]));
+                const start = s.rangeStart || (heat.length ? heat[0].date : null);
+                const end = s.rangeEnd || (heat.length ? heat[heat.length - 1].date : null);
+                const timeline = document.getElementById('workoutTimeline');
+                timeline.innerHTML = '';
+                if (!start || !end) {
+                    timeline.innerHTML = '<span class="text-muted">No data</span>';
+                    return;
+                }
+
+                // Update date range display with actual data
+                const afterInput = document.getElementById('afterDate').value;
+                const beforeInput = document.getElementById('beforeDate').value;
+                if (!afterInput && !beforeInput) {
+                    // Set the input field values
+                    document.getElementById('afterDate').value = start;
+                    document.getElementById('beforeDate').value = end;
+
+                    // Update the display
+                    document.getElementById('displayStartDate').textContent = start;
+                    document.getElementById('displayEndDate').textContent = end;
+                    const startDate = new Date(start);
+                    const endDate = new Date(end);
+                    const diffTime = Math.abs(endDate - startDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    document.getElementById('displayTotalDays').textContent = diffDays;
+                    document.getElementById('dateRangeDisplay').style.display = 'block';
+                }
+
+                let cur = new Date(start);
+                const endDate = new Date(end);
+                while (cur <= endDate) {
+                    const key = cur.toISOString().slice(0,10);
+                    const hours = byDate.get(key) || 0;
+                    const lvl = hours === 0 ? 0 : (hours < 1 ? 1 : (hours < 2 ? 2 : 3));
+                    const box = document.createElement('div');
+                    box.className = 'day-cell lvl-' + lvl;
+                    box.title = key + (hours ? ` — ${hours.toFixed(2)}h` : ' — No activity');
+                    timeline.appendChild(box);
+                    cur.setDate(cur.getDate() + 1);
+                }
+            });
         }
 
         function loadRunStatistics() {
@@ -341,6 +484,55 @@
                         <div class="col-md-3 mt-3"><div class="card"><div class="card-body"><h6>Longest Run</h6><h3>${data.longestRun} mi</h3></div></div></div>
                         <div class="col-md-3 mt-3"><div class="card"><div class="card-body"><h6>Most Elevation</h6><h3>${data.mostElevation} ft</h3></div></div></div>
                     `;
+                    // Also load the run distribution chart
+                    loadRunDistribution();
+                });
+        }
+
+        function loadRunDistribution() {
+            fetch('/api/stats/run-distribution' + getDateParams())
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('runDistributionChart').getContext('2d');
+                    if (runDistributionChart) runDistributionChart.destroy();
+                    runDistributionChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(d => d.distanceRange),
+                            datasets: [{
+                                label: 'Number of Runs',
+                                data: data.map(d => d.count),
+                                backgroundColor: 'rgba(75, 112, 235, 0.8)',
+                                borderColor: 'rgba(75, 112, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                datalabels: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Number of Runs'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Distance Range (miles)'
+                                    }
+                                }
+                            }
+                        }
+                    });
                 });
         }
 
@@ -349,8 +541,32 @@
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('runningHeatmap');
-                    container.innerHTML = '<p class="text-muted">Running heatmap - ' + data.length + ' days of running</p>';
-                    // TODO: Implement proper heatmap visualization
+                    container.innerHTML = '';
+
+                    if (!data || data.length === 0) {
+                        container.innerHTML = '<span class="text-muted">No running data</span>';
+                        return;
+                    }
+
+                    // Build timeline from first to last run date
+                    const dates = data.map(d => new Date(d.date));
+                    const start = new Date(Math.min(...dates));
+                    const end = new Date(Math.max(...dates));
+
+                    // Create a map of date to miles
+                    const byDate = new Map(data.map(h => [h.date, h.value]));
+
+                    let cur = new Date(start);
+                    while (cur <= end) {
+                        const key = cur.toISOString().slice(0, 10);
+                        const miles = byDate.get(key) || 0;
+                        const lvl = miles === 0 ? 0 : (miles < 3 ? 1 : (miles < 6 ? 2 : (miles < 10 ? 3 : 4)));
+                        const box = document.createElement('div');
+                        box.className = 'day-cell lvl-' + lvl;
+                        box.title = key + (miles ? ` — ${miles.toFixed(2)} mi` : ' — No run');
+                        container.appendChild(box);
+                        cur.setDate(cur.getDate() + 1);
+                    }
                 });
         }
 
@@ -368,13 +584,40 @@
                                 label: 'Miles',
                                 data: data.map(d => d.value),
                                 borderColor: 'rgb(75, 192, 192)',
-                                tension: 0.1
+                                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
                             }]
                         },
                         options: {
                             responsive: true,
+                            plugins: {
+                                legend: { display: true },
+                                datalabels: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' mi';
+                                        }
+                                    }
+                                }
+                            },
                             scales: {
-                                y: { beginAtZero: true }
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Miles'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                }
                             }
                         }
                     });
@@ -392,23 +635,50 @@
                         data: {
                             labels: data.map(d => d.label),
                             datasets: [{
-                                label: 'Pace (sec/mile)',
+                                label: 'Pace',
                                 data: data.map(d => d.value),
                                 borderColor: 'rgb(255, 99, 132)',
-                                tension: 0.1
+                                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
                             }]
                         },
                         options: {
                             responsive: true,
+                            plugins: {
+                                legend: { display: true },
+                                datalabels: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const mins = Math.floor(context.parsed.y / 60);
+                                            const secs = Math.floor(context.parsed.y % 60);
+                                            return 'Pace: ' + mins + ':' + (secs < 10 ? '0' : '') + secs + ' /mi';
+                                        }
+                                    }
+                                }
+                            },
                             scales: {
                                 y: {
                                     beginAtZero: false,
+                                    title: {
+                                        display: true,
+                                        text: 'Pace (min/mile)'
+                                    },
                                     ticks: {
                                         callback: function(value) {
                                             const mins = Math.floor(value / 60);
                                             const secs = Math.floor(value % 60);
                                             return mins + ':' + (secs < 10 ? '0' : '') + secs;
                                         }
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
                                     }
                                 }
                             }
@@ -417,11 +687,41 @@
                 });
         }
 
+        function updateDateRangeDisplay() {
+            const after = document.getElementById('afterDate').value;
+            const before = document.getElementById('beforeDate').value;
+            const display = document.getElementById('dateRangeDisplay');
+
+            if (after || before) {
+                const startDate = after || '(earliest activity)';
+                const endDate = before || '(latest activity)';
+
+                document.getElementById('displayStartDate').textContent = startDate;
+                document.getElementById('displayEndDate').textContent = endDate;
+
+                // Calculate days if both dates are provided
+                if (after && before) {
+                    const start = new Date(after);
+                    const end = new Date(before);
+                    const diffTime = Math.abs(end - start);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    document.getElementById('displayTotalDays').textContent = diffDays;
+                } else {
+                    document.getElementById('displayTotalDays').textContent = 'N/A';
+                }
+
+                display.style.display = 'block';
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
         function loadAllData() {
+            updateDateRangeDisplay();
             loadActivityCount();
             loadTimeDistribution();
-            loadWorkoutStreaks();
-            loadRunStatistics();
+            loadWorkoutHeatmap();
+            loadRunStatistics(); // This also loads run distribution
             loadRunningHeatmap();
             loadMileageTrend('daily');
             loadPaceTrend('daily');

@@ -7,7 +7,7 @@ A Spring Boot application for analyzing Strava activities with comprehensive sta
 - **Secure Strava OAuth Authentication** - Login with your Strava account
 - **Activity Count Distribution** - Pie chart showing activity types with counts and percentages
 - **Time Distribution** - Visualize time spent per activity type in HH:MM format
-- **Workout Streaks** - Heatmap tracking activities with intensity coloration
+- **Workout Heatmap** - Heatmap tracking activities with intensity coloration
 - **Run Statistics** - Comprehensive running metrics including:
   - Total runs and 10K+ runs count
   - Total miles and average pace
@@ -106,7 +106,7 @@ All endpoints require OAuth authentication and support optional `after` and `bef
 
 - `GET /api/stats/activity-count` - Activity count distribution
 - `GET /api/stats/time-distribution` - Time spent per activity type
-- `GET /api/stats/workout-streaks` - Workout streaks heatmap data
+- `GET /api/stats/workout-heatmap` - Workout heatmap data
 - `GET /api/stats/run-statistics` - Comprehensive running statistics
 - `GET /api/stats/running-heatmap` - Running mileage heatmap data
 - `GET /api/stats/mileage-trend?period={daily|weekly|monthly}` - Running mileage trends
