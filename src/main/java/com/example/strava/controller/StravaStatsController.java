@@ -53,6 +53,17 @@ public class StravaStatsController {
         return stravaStatsService.getWorkoutStreaksHeatmap(activities);
     }
 
+    @GetMapping("/workout-streaks/summary")
+    public WorkoutStreakDto getWorkoutStreakSummary(
+            @AuthenticationPrincipal OAuth2User principal,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
+
+        List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
+        LocalDate reference = (before != null) ? before : LocalDate.now();
+        return stravaStatsService.getWorkoutStreakSummary(activities, reference);
+    }
+
     @GetMapping("/run-statistics")
     public RunStatsDto getRunStatistics(
             @AuthenticationPrincipal OAuth2User principal,

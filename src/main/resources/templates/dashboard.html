@@ -135,6 +135,10 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Workout Streaks Heatmap</h5>
+                        <div id="streakSummary" class="mb-3">
+                            <span class="badge bg-success me-2">Current Streak: <span id="currentStreak">0</span> days</span>
+                            <span class="badge bg-primary">Longest Streak: <span id="longestStreak">0</span> days <small class="text-light-50" id="longestStreakDates"></small></span>
+                        </div>
                         <div id="workoutStreaksHeatmap"></div>
                     </div>
                 </div>
@@ -301,12 +305,24 @@
         }
 
         function loadWorkoutStreaks() {
+            // Load heatmap data (placeholder visualization)
             fetch('/api/stats/workout-streaks' + getDateParams())
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('workoutStreaksHeatmap');
                     container.innerHTML = '<p class="text-muted">Heatmap visualization - ' + data.length + ' days of activity</p>';
-                    // TODO: Implement proper heatmap visualization
+                });
+
+            // Load streak summary numbers
+            fetch('/api/stats/workout-streaks/summary' + getDateParams())
+                .then(r => r.json())
+                .then(s => {
+                    document.getElementById('currentStreak').innerText = s.currentStreak ?? 0;
+                    document.getElementById('longestStreak').innerText = s.longestStreak ?? 0;
+                    const dates = (s.longestStreakStart && s.longestStreakEnd)
+                        ? `(${s.longestStreakStart} → ${s.longestStreakEnd})`
+                        : '';
+                    document.getElementById('longestStreakDates').innerText = dates;
                 });
         }
 

@@ -75,6 +75,58 @@ public class StravaStatsService {
                 .collect(Collectors.toList());
     }
 
+    public WorkoutStreakDto getWorkoutStreakSummary(List<StravaActivity> activities, LocalDate referenceDate) {
+        if (referenceDate == null) referenceDate = LocalDate.now();
+
+        // Build a sorted unique set of dates with any activity
+        SortedSet<LocalDate> activityDates = activities.stream()
+                .map(a -> a.getStartDateLocal().toLocalDate())
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        if (activityDates.isEmpty()) {
+            return WorkoutStreakDto.builder()
+                    .currentStreak(0)
+                    .longestStreak(0)
+                    .build();
+        }
+
+        // Current streak: count back from referenceDate
+        int current = 0;
+        LocalDate cursor = referenceDate;
+        while (activityDates.contains(cursor)) {
+            current++;
+            cursor = cursor.minusDays(1);
+        }
+
+        // Longest streak over all dates
+        int longest = 0;
+        LocalDate longestStart = null;
+        LocalDate longestEnd = null;
+
+        LocalDate streakStart = null;
+        LocalDate prev = null;
+        for (LocalDate d : activityDates) {
+            if (prev == null || !d.equals(prev.plusDays(1))) {
+                // new streak
+                streakStart = d;
+            }
+            int length = (int) (ChronoUnit.DAYS.between(streakStart, d) + 1);
+            if (length > longest) {
+                longest = length;
+                longestStart = streakStart;
+                longestEnd = d;
+            }
+            prev = d;
+        }
+
+        return WorkoutStreakDto.builder()
+                .currentStreak(current)
+                .longestStreak(longest)
+                .longestStreakStart(longestStart)
+                .longestStreakEnd(longestEnd)
+                .build();
+    }
+
     public RunStatsDto getRunStatistics(List<StravaActivity> activities) {
         List<StravaActivity> runs = activities.stream()
                 .filter(a -> "Run".equalsIgnoreCase(a.getType()) ||
