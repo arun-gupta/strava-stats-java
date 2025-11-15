@@ -225,16 +225,22 @@
 
             <!-- Run Statistics -->
             <div class="tab-pane fade" id="run-stats" role="tabpanel">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Running Statistics</h5>
-                        <div id="runStatsContent" class="row"></div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Run Distance Distribution (miles)</h5>
+                                <canvas id="runDistributionChart"></canvas>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Run Distance Distribution (miles)</h5>
-                        <canvas id="runDistributionChart"></canvas>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Running Statistics</h5>
+                                <div id="runStatsContent" class="row"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,13 +252,30 @@
                         <h5 class="card-title">Running Heatmap</h5>
                         <p class="text-muted small mb-2">This view tracks your running activities, showing daily mileage with color-coded intensity.</p>
                         <div class="d-flex justify-content-end align-items-center small text-muted mb-2">
-                            <div class="legend-item"><span class="legend-swatch lvl-0"></span>No Run</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-1"></span>< 3mi</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-2"></span>3–6mi</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-3"></span>6–10mi</div>
-                            <div class="legend-item"><span class="legend-swatch" style="background:#e65100;border:1px solid rgba(0,0,0,0.05);"></span>10mi+</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-0"></span>Non-Running</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-1"></span>Easy</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-2"></span>Moderate</div>
+                            <div class="legend-item"><span class="legend-swatch lvl-3"></span>Big Day</div>
                         </div>
-                        <div id="runningHeatmap" class="heatmap-grid"></div>
+                        <div id="runningHeatmap" class="heatmap-grid mb-3"></div>
+                        <div class="row text-center" id="runningStats">
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="h3 mb-0" id="runningDays">0</div>
+                                <div class="text-muted small">Running Days</div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="h3 mb-0" id="nonRunningDays">0</div>
+                                <div class="text-muted small">Non-Running Days</div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="h3 mb-0" id="currentRunStreak">0</div>
+                                <div class="text-muted small">Current Streak</div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="h3 mb-0" id="longestRunGap">0</div>
+                                <div class="text-muted small">Longest Gap</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -314,7 +337,7 @@
                     activityCountChart = new Chart(ctx, {
                         type: 'pie',
                         data: {
-                            labels: data.map(d => d.activityType),
+                            labels: data.map(d => `${d.activityType} (${d.count} activities)`),
                             datasets: [{
                                 data: data.map(d => d.count),
                                 backgroundColor: generateColors(data.length)
@@ -324,6 +347,10 @@
                             responsive: true,
                             plugins: {
                                 legend: { position: 'right' },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Activities by Type'
+                                },
                                 datalabels: {
                                     color: '#fff',
                                     font: { weight: 'bold' },
@@ -369,6 +396,10 @@
                             responsive: true,
                             plugins: {
                                 legend: { position: 'right' },
+                                title: {
+                                    display: true,
+                                    text: 'Time Spent by Activity Type'
+                                },
                                 datalabels: {
                                     color: '#fff',
                                     font: { weight: 'bold' },
@@ -556,7 +587,36 @@
                     // Create a map of date to miles
                     const byDate = new Map(data.map(h => [h.date, h.value]));
 
+                    // Calculate statistics
+                    let runningDays = 0;
+                    let nonRunningDays = 0;
+                    let currentStreak = 0;
+                    let longestGap = 0;
+                    let currentGap = 0;
+
+                    // Get today or the end date from filter
+                    const referenceDate = new Date(end);
+
                     let cur = new Date(start);
+                    const allDates = [];
+                    while (cur <= end) {
+                        allDates.push(new Date(cur));
+                        cur.setDate(cur.getDate() + 1);
+                    }
+
+                    // Calculate current streak from end date backwards
+                    for (let i = allDates.length - 1; i >= 0; i--) {
+                        const key = allDates[i].toISOString().slice(0, 10);
+                        const miles = byDate.get(key) || 0;
+                        if (miles > 0) {
+                            currentStreak++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Build timeline and calculate stats
+                    cur = new Date(start);
                     while (cur <= end) {
                         const key = cur.toISOString().slice(0, 10);
                         const miles = byDate.get(key) || 0;
@@ -565,8 +625,27 @@
                         box.className = 'day-cell lvl-' + lvl;
                         box.title = key + (miles ? ` — ${miles.toFixed(2)} mi` : ' — No run');
                         container.appendChild(box);
+
+                        // Count running vs non-running days
+                        if (miles > 0) {
+                            runningDays++;
+                            currentGap = 0;
+                        } else {
+                            nonRunningDays++;
+                            currentGap++;
+                            if (currentGap > longestGap) {
+                                longestGap = currentGap;
+                            }
+                        }
+
                         cur.setDate(cur.getDate() + 1);
                     }
+
+                    // Update statistics display
+                    document.getElementById('runningDays').textContent = runningDays;
+                    document.getElementById('nonRunningDays').textContent = nonRunningDays;
+                    document.getElementById('currentRunStreak').textContent = currentStreak;
+                    document.getElementById('longestRunGap').textContent = longestGap;
                 });
         }
 
