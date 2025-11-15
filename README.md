@@ -54,16 +54,37 @@ In IntelliJ IDEA:
 
 ## Configuration
 
-Set the following environment variables:
+### Option 1: Local Properties File (Recommended for Development)
+
+Create `src/main/resources/application-local.properties`:
+
+```properties
+spring.security.oauth2.client.registration.strava.client-id=your-client-id
+spring.security.oauth2.client.registration.strava.client-secret=your-client-secret
+```
+
+This file is already in `.gitignore` and won't be committed to the repository.
+
+### Option 2: Environment Variables
 
 ```bash
 export STRAVA_CLIENT_ID=your-client-id
 export STRAVA_CLIENT_SECRET=your-client-secret
 ```
 
-Or update `src/main/resources/application.properties` directly (not recommended for production).
+### Option 3: Direct Configuration
+
+Update `src/main/resources/application.properties` directly (not recommended - secrets will be committed to Git).
 
 ## Running the Application
+
+If using `application-local.properties` (Option 1), run with the local profile:
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+If using environment variables (Option 2), run:
 
 ```bash
 ./gradlew bootRun
