@@ -6,6 +6,19 @@
     <title>Dashboard - Strava Stats</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <!-- Chart.js data labels plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <style>
+        /* Reduce pie chart size to 50% and center it */
+        .chart-half {
+            max-width: 50%;
+            margin: 0 auto;
+        }
+        .chart-half canvas {
+            width: 100% !important; /* let the container control actual width */
+            height: auto !important;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -98,7 +111,9 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Activity Count Distribution</h5>
-                        <canvas id="activityCountChart"></canvas>
+                        <div class="chart-half">
+                            <canvas id="activityCountChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -108,7 +123,9 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Time Distribution</h5>
-                        <canvas id="timeDistChart"></canvas>
+                        <div class="chart-half">
+                            <canvas id="timeDistChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -188,6 +205,9 @@
             return params ? '?' + params : '';
         }
 
+        // Register plugins
+        Chart.register(ChartDataLabels);
+
         function loadActivityCount() {
             fetch('/api/stats/activity-count' + getDateParams())
                 .then(response => response.json())
@@ -206,7 +226,27 @@
                         options: {
                             responsive: true,
                             plugins: {
-                                legend: { position: 'right' }
+                                legend: { position: 'right' },
+                                datalabels: {
+                                    color: '#fff',
+                                    font: { weight: 'bold' },
+                                    anchor: 'center',
+                                    align: 'center',
+                                    clamp: true,
+                                    formatter: (value, context) => {
+                                        const arr = context.dataset.data;
+                                        const total = arr.reduce((a, b) => a + b, 0) || 0;
+                                        const pct = total ? (value / total * 100) : 0;
+                                        // Only show 1 decimal if under 10%, else no decimals
+                                        const pctStr = pct < 10 ? pct.toFixed(1) : Math.round(pct).toString();
+                                        return `${value} (${pctStr}%)`;
+                                    },
+                                    display: (context) => {
+                                        const v = context.dataset.data[context.dataIndex];
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0) || 0;
+                                        return total && (v / total) >= 0.05; // show if >=5% of the pie
+                                    }
+                                }
                             }
                         }
                     });
@@ -231,7 +271,29 @@
                         options: {
                             responsive: true,
                             plugins: {
-                                legend: { position: 'right' }
+                                legend: { position: 'right' },
+                                datalabels: {
+                                    color: '#fff',
+                                    font: { weight: 'bold' },
+                                    anchor: 'center',
+                                    align: 'center',
+                                    clamp: true,
+                                    formatter: (value, context) => {
+                                        const arr = context.dataset.data;
+                                        const total = arr.reduce((a, b) => a + b, 0) || 0;
+                                        const pct = total ? (value / total * 100) : 0;
+                                        const pctStr = pct < 10 ? pct.toFixed(1) : Math.round(pct).toString();
+                                        // Prefer formatted HH:MM if available
+                                        const idx = context.dataIndex;
+                                        const formatted = (data && data[idx] && data[idx].formattedTime) ? data[idx].formattedTime : `${value.toFixed(1)}h`;
+                                        return `${formatted} (${pctStr}%)`;
+                                    },
+                                    display: (context) => {
+                                        const v = context.dataset.data[context.dataIndex];
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0) || 0;
+                                        return total && (v / total) >= 0.05; // show if >=5% of the pie
+                                    }
+                                }
                             }
                         }
                     });

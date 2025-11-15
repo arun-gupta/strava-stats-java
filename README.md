@@ -1,4 +1,4 @@
-# strava-stats-java
+# Strava Activity Analyzer
 
 A Spring Boot application for analyzing Strava activities with comprehensive statistics and visualizations.
 
