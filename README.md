@@ -45,7 +45,6 @@ Get up and running in 5 minutes:
 - **Mileage Trend** - Daily/Weekly/Monthly running mileage charts with smooth curves and tooltips
 - **Pace Trend** - Daily/Weekly/Monthly average pace displayed in MM:SS format
 - **Date Range Filtering** - Quick pick buttons (7 days, 30 days, 90 days, 6 months, 1 year, All Time) and custom date range selection
-- **Feature Overview** - Visual summary of all available analytics at a glance
 
 ## Documentation
 
