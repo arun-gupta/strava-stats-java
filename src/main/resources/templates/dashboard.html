@@ -80,6 +80,18 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Date Range</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Quick Pick</label>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(7)">Last 7 Days</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(30)">Last 30 Days</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(90)">Last 90 Days</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(365)">Last Year</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(0)">All Time</button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-3">
                                 <label for="afterDate" class="form-label">Start Date</label>
@@ -764,6 +776,26 @@
                         }
                     });
                 });
+        }
+
+        function setDateRange(days) {
+            const today = new Date();
+            const endDate = today.toISOString().split('T')[0];
+
+            if (days === 0) {
+                // All time - clear dates to show all data
+                document.getElementById('afterDate').value = '';
+                document.getElementById('beforeDate').value = '';
+            } else {
+                // Set start date to 'days' ago
+                const startDate = new Date(today);
+                startDate.setDate(startDate.getDate() - days);
+                document.getElementById('afterDate').value = startDate.toISOString().split('T')[0];
+                document.getElementById('beforeDate').value = endDate;
+            }
+
+            // Apply the filter
+            loadAllData();
         }
 
         function updateDateRangeDisplay() {
