@@ -415,6 +415,8 @@
                 .then(data => {
                     const ctx = document.getElementById('timeDistChart').getContext('2d');
                     if (timeDistChart) timeDistChart.destroy();
+                    // Store original data for legend formatting
+                    const originalData = data;
                     timeDistChart = new Chart(ctx, {
                         type: 'pie',
                         data: {
@@ -427,7 +429,32 @@
                         options: {
                             responsive: true,
                             plugins: {
-                                legend: { position: 'right' },
+                                legend: { 
+                                    position: 'right',
+                                    labels: {
+                                        generateLabels: (chart) => {
+                                            const chartData = chart.data;
+                                            if (chartData.labels.length && chartData.datasets.length) {
+                                                return chartData.labels.map((label, i) => {
+                                                    const value = chartData.datasets[0].data[i];
+                                                    const total = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
+                                                    const pct = total ? (value / total * 100) : 0;
+                                                    const pctStr = pct < 10 ? pct.toFixed(1) : Math.round(pct).toString();
+                                                    // Use formattedTime from original data (HH:MM format)
+                                                    const formattedTime = originalData[i]?.formattedTime || formatHoursToHHMM(value);
+                                                    const activityType = originalData[i]?.activityType || label.split(' (')[0];
+                                                    return {
+                                                        text: `${activityType} (${formattedTime}) - ${pctStr}%`,
+                                                        fillStyle: chartData.datasets[0].backgroundColor[i],
+                                                        hidden: false,
+                                                        index: i
+                                                    };
+                                                });
+                                            }
+                                            return [];
+                                        }
+                                    }
+                                },
                                 title: {
                                     display: true,
                                     text: 'Time Spent by Activity Type'
@@ -666,19 +693,33 @@
                     const container = document.getElementById('runningHeatmap');
                     container.innerHTML = '';
 
+                    // Helper function to format date as YYYY-MM-DD in local timezone
+                    function formatLocalDate(date) {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    }
+
+                    // Helper function to create date from YYYY-MM-DD string in local timezone
+                    function parseLocalDate(dateStr) {
+                        const [year, month, day] = dateStr.split('-').map(Number);
+                        return new Date(year, month - 1, day);
+                    }
+
                     // Get the actual filter date range
                     const afterInput = document.getElementById('afterDate').value;
                     const beforeInput = document.getElementById('beforeDate').value;
                     
                     // Determine the range: use filter dates if provided, otherwise use data range
-                    let start, end;
+                    let startDate, endDate;
                     if (afterInput && beforeInput) {
-                        start = new Date(afterInput);
-                        end = new Date(beforeInput);
+                        startDate = parseLocalDate(afterInput);
+                        endDate = parseLocalDate(beforeInput);
                     } else if (data && data.length > 0) {
-                        const dates = data.map(d => new Date(d.date));
-                        start = new Date(Math.min(...dates));
-                        end = new Date(Math.max(...dates));
+                        const dates = data.map(d => parseLocalDate(d.date));
+                        startDate = new Date(Math.min(...dates));
+                        endDate = new Date(Math.max(...dates));
                     } else {
                         container.innerHTML = '<span class="text-muted">No running data</span>';
                         return;
@@ -695,16 +736,19 @@
                     let currentGap = 0;
 
                     // Build all dates in the range
-                    let cur = new Date(start);
+                    let cur = new Date(startDate);
                     const allDates = [];
-                    while (cur <= end) {
-                        allDates.push(new Date(cur));
+                    const endDateStr = formatLocalDate(endDate);
+                    while (true) {
+                        const curDateStr = formatLocalDate(cur);
+                        allDates.push(curDateStr);
+                        if (curDateStr === endDateStr) break;
                         cur.setDate(cur.getDate() + 1);
                     }
 
                     // Calculate current streak from end date backwards
                     for (let i = allDates.length - 1; i >= 0; i--) {
-                        const key = allDates[i].toISOString().slice(0, 10);
+                        const key = allDates[i];
                         const miles = byDate.get(key) || 0;
                         if (miles > 0) {
                             currentStreak++;
@@ -714,9 +758,9 @@
                     }
 
                     // Build timeline and calculate stats over the full range
-                    cur = new Date(start);
-                    while (cur <= end) {
-                        const key = cur.toISOString().slice(0, 10);
+                    cur = new Date(startDate);
+                    while (true) {
+                        const key = formatLocalDate(cur);
                         const miles = byDate.get(key) || 0;
                         const lvl = miles === 0 ? 0 : (miles < 3 ? 1 : (miles < 6 ? 2 : (miles < 10 ? 3 : 4)));
                         const box = document.createElement('div');
@@ -736,6 +780,7 @@
                             }
                         }
 
+                        if (key === endDateStr) break;
                         cur.setDate(cur.getDate() + 1);
                     }
 
@@ -938,6 +983,13 @@
                 'rgba(99, 255, 132, 0.8)'
             ];
             return colors.slice(0, count);
+        }
+
+        function formatHoursToHHMM(hours) {
+            const totalMinutes = Math.round(hours * 60);
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
 
         // Load data on page load with default 30 days
