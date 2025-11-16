@@ -35,7 +35,8 @@ public class StravaApiService {
         OAuth2AccessToken accessToken = client.getAccessToken();
 
         long afterEpoch = after != null ? after.atStartOfDay(ZoneId.systemDefault()).toEpochSecond() : 0;
-        long beforeEpoch = before != null ? before.atStartOfDay(ZoneId.systemDefault()).toEpochSecond() : System.currentTimeMillis() / 1000;
+        // Strava's 'before' parameter is exclusive, so add 1 day to include activities on the 'before' date
+        long beforeEpoch = before != null ? before.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond() : System.currentTimeMillis() / 1000;
 
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
