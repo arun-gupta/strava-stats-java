@@ -648,15 +648,23 @@
                     const container = document.getElementById('runningHeatmap');
                     container.innerHTML = '';
 
-                    if (!data || data.length === 0) {
+                    // Get the actual filter date range
+                    const afterInput = document.getElementById('afterDate').value;
+                    const beforeInput = document.getElementById('beforeDate').value;
+                    
+                    // Determine the range: use filter dates if provided, otherwise use data range
+                    let start, end;
+                    if (afterInput && beforeInput) {
+                        start = new Date(afterInput);
+                        end = new Date(beforeInput);
+                    } else if (data && data.length > 0) {
+                        const dates = data.map(d => new Date(d.date));
+                        start = new Date(Math.min(...dates));
+                        end = new Date(Math.max(...dates));
+                    } else {
                         container.innerHTML = '<span class="text-muted">No running data</span>';
                         return;
                     }
-
-                    // Build timeline from first to last run date
-                    const dates = data.map(d => new Date(d.date));
-                    const start = new Date(Math.min(...dates));
-                    const end = new Date(Math.max(...dates));
 
                     // Create a map of date to miles
                     const byDate = new Map(data.map(h => [h.date, h.value]));
@@ -668,9 +676,7 @@
                     let longestGap = 0;
                     let currentGap = 0;
 
-                    // Get today or the end date from filter
-                    const referenceDate = new Date(end);
-
+                    // Build all dates in the range
                     let cur = new Date(start);
                     const allDates = [];
                     while (cur <= end) {
@@ -689,7 +695,7 @@
                         }
                     }
 
-                    // Build timeline and calculate stats
+                    // Build timeline and calculate stats over the full range
                     cur = new Date(start);
                     while (cur <= end) {
                         const key = cur.toISOString().slice(0, 10);
