@@ -240,6 +240,17 @@
                             </div>
                         </div>
                         <p class="mt-2" id="consistencyMsg"></p>
+                        <div class="mt-3" id="showGapDetailsContainer" style="display: none;">
+                            <button class="btn btn-sm btn-outline-primary" onclick="toggleGapDetails()">
+                                <span id="gapDetailsToggleText">Show Gap Details</span>
+                            </button>
+                        </div>
+                        <div class="mt-3" id="gapDetailsSection" style="display: none;">
+                            <div class="alert alert-warning">
+                                <h6 class="alert-heading">Missed Days:</h6>
+                                <div id="gapDetailsList"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -468,15 +479,18 @@
                 if ((s.missedDays ?? 0) === 0) {
                     msg.className = 'text-success';
                     msg.textContent = 'No gaps — excellent consistency!';
+                    document.getElementById('showGapDetailsContainer').style.display = 'none';
                 } else if ((s.currentStreak ?? 0) >= 7) {
                     msg.className = 'text-success';
                     msg.textContent = 'Great job keeping a strong streak going!';
+                    document.getElementById('showGapDetailsContainer').style.display = 'block';
                 } else {
                     msg.className = 'text-muted';
                     msg.textContent = 'Keep building your routine — every day counts.';
+                    document.getElementById('showGapDetailsContainer').style.display = 'block';
                 }
 
-                // Build timeline
+                // Build timeline and collect gap information
                 const byDate = new Map(heat.map(h => [h.date, h.value]));
                 const start = s.rangeStart || (heat.length ? heat[0].date : null);
                 const end = s.rangeEnd || (heat.length ? heat[heat.length - 1].date : null);
@@ -508,6 +522,7 @@
 
                 let cur = new Date(start);
                 const endDate = new Date(end);
+                const missedDays = [];
                 while (cur <= endDate) {
                     const key = cur.toISOString().slice(0,10);
                     const hours = byDate.get(key) || 0;
@@ -516,9 +531,44 @@
                     box.className = 'day-cell lvl-' + lvl;
                     box.title = key + (hours ? ` — ${hours.toFixed(2)}h` : ' — No activity');
                     timeline.appendChild(box);
+
+                    // Collect missed days
+                    if (hours === 0) {
+                        missedDays.push(key);
+                    }
+
                     cur.setDate(cur.getDate() + 1);
                 }
+
+                // Store missed days globally for the toggle function
+                window.workoutMissedDays = missedDays;
             });
+        }
+
+        function toggleGapDetails() {
+            const section = document.getElementById('gapDetailsSection');
+            const toggleText = document.getElementById('gapDetailsToggleText');
+
+            if (section.style.display === 'none') {
+                // Show gap details
+                const missedDays = window.workoutMissedDays || [];
+                const listDiv = document.getElementById('gapDetailsList');
+
+                if (missedDays.length === 0) {
+                    listDiv.textContent = 'No missed days found.';
+                } else {
+                    listDiv.innerHTML = '<ul class="mb-0">' +
+                        missedDays.map(day => `<li>${day}</li>`).join('') +
+                        '</ul>';
+                }
+
+                section.style.display = 'block';
+                toggleText.textContent = 'Hide Gap Details';
+            } else {
+                // Hide gap details
+                section.style.display = 'none';
+                toggleText.textContent = 'Show Gap Details';
+            }
         }
 
         function loadRunStatistics() {
