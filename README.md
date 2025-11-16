@@ -28,7 +28,7 @@ Get up and running in 5 minutes:
    - Authorize the application
    - Start analyzing your activities!
 
-> **Note:** Requires Java 21. See [Prerequisites](#prerequisites) for installation instructions.
+> **Note:** Requires Java 21. For detailed setup instructions, see [SETUP.md](SETUP.md).
 
 ## Features
 
