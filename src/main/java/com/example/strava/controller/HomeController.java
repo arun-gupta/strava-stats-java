@@ -31,17 +31,30 @@ public class HomeController {
     public String handleError(HttpServletRequest request, Model model) {
         // Check if error message was stored in session by AuthenticationFailureHandler
         String sessionErrorMessage = (String) request.getSession().getAttribute("errorMessage");
-        if (sessionErrorMessage != null) {
+        if (sessionErrorMessage != null && !sessionErrorMessage.isEmpty()) {
             request.getSession().removeAttribute("errorMessage");
             model.addAttribute("errorMessage", sessionErrorMessage);
+            Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+            model.addAttribute("status", status != null ? status.toString() : "Unknown");
             return "error";
         }
+        
+        // Check query parameters for error information
+        String errorParam = request.getParameter("error");
+        String errorDescription = request.getParameter("error_description");
         
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
         
         String errorMessage = "An error occurred during authentication.";
+        
+        // Check query parameters first
+        if (errorDescription != null && !errorDescription.isEmpty()) {
+            errorMessage = errorDescription;
+        } else if (errorParam != null && !errorParam.isEmpty()) {
+            errorMessage = "Authentication Error: " + errorParam;
+        }
         
         if (exception != null && exception instanceof Exception) {
             Exception ex = (Exception) exception;
@@ -88,8 +101,23 @@ public class HomeController {
                     errorMessage = "Error: " + exMessage;
                 }
             }
-        } else if (message != null) {
+        } else if (message != null && !message.toString().isEmpty()) {
             errorMessage = message.toString();
+        }
+        
+        // If we still have the default message and there's a status code, provide a more helpful message
+        if (errorMessage.equals("An error occurred during authentication.") && status != null) {
+            String statusStr = status.toString();
+            if ("999".equals(statusStr)) {
+                errorMessage = "Authentication failed: Unable to complete OAuth login. This may be due to Strava API rate limits or connection issues. Please try again in a few minutes.";
+            } else {
+                errorMessage = "Authentication Error (Status " + statusStr + "): Unable to complete login. Please try again.";
+            }
+        }
+        
+        // Ensure we always have a message
+        if (errorMessage == null || errorMessage.isEmpty()) {
+            errorMessage = "An unexpected error occurred during authentication. Please try again.";
         }
         
         model.addAttribute("errorMessage", errorMessage);
