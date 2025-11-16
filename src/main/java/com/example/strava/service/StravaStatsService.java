@@ -129,11 +129,7 @@ public class StravaStatsService {
 
         // Determine range for metrics/timeline
         // Use filter start date if provided, otherwise use first activity date
-        LocalDate requestedStart = rangeStartFilter != null ? rangeStartFilter : activityDates.first();
-        LocalDate firstActivityDate = activityDates.first();
-        // Adjust range start to first activity date if filter starts before any activities
-        // This prevents counting days before tracking started as "missed days"
-        LocalDate rangeStart = requestedStart.isBefore(firstActivityDate) ? firstActivityDate : requestedStart;
+        LocalDate rangeStart = rangeStartFilter != null ? rangeStartFilter : activityDates.first();
         LocalDate rangeEnd = referenceDate;
         if (rangeEnd.isBefore(rangeStart)) {
             // fallback to at least cover the reference day
