@@ -3,9 +3,11 @@ package com.example.strava.controller;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -85,6 +87,46 @@ public class HomeController {
         model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("status", status != null ? status.toString() : "Unknown");
         
+        return "error";
+    }
+
+    @ExceptionHandler(OAuth2AuthenticationException.class)
+    public String handleOAuth2Exception(OAuth2AuthenticationException ex, Model model) {
+        String errorMessage = "An error occurred during authentication.";
+        String exMessage = ex.getMessage();
+        
+        if (exMessage != null) {
+            // Try to extract JSON error message from Strava API response
+            if (exMessage.contains("\"message\"")) {
+                try {
+                    int messageStart = exMessage.indexOf("\"message\":\"") + 11;
+                    int messageEnd = exMessage.indexOf("\"", messageStart);
+                    if (messageEnd > messageStart) {
+                        String apiMessage = exMessage.substring(messageStart, messageEnd);
+                        if (apiMessage.contains("Rate Limit Exceeded")) {
+                            errorMessage = "Strava API Rate Limit Exceeded: You've made too many requests. Please wait a few minutes and try again.";
+                        } else {
+                            errorMessage = "Strava API Error: " + apiMessage;
+                        }
+                    }
+                } catch (Exception e) {
+                    // Fall through to default handling
+                }
+            }
+            
+            // Check for specific error types
+            if (exMessage.contains("429") || exMessage.contains("Rate Limit Exceeded")) {
+                errorMessage = "Strava API Rate Limit Exceeded: You've made too many requests. Please wait a few minutes and try again.";
+            } else if (exMessage.contains("401") || exMessage.contains("Unauthorized")) {
+                errorMessage = "Authentication Failed: Invalid credentials or expired token. Please try logging in again.";
+            } else if (exMessage.contains("403") || exMessage.contains("Forbidden")) {
+                errorMessage = "Access Forbidden: You don't have permission to access this resource.";
+            } else if (errorMessage.equals("An error occurred during authentication.")) {
+                errorMessage = "Authentication Error: " + exMessage;
+            }
+        }
+        
+        model.addAttribute("errorMessage", errorMessage);
         return "error";
     }
 }
