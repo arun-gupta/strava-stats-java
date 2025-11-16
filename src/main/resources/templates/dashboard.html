@@ -534,12 +534,10 @@
                     box.title = key + (hours ? ` — ${hours.toFixed(2)}h` : ' — No activity');
                     timeline.appendChild(box);
 
-                    // Collect missed days
+                    // Collect missed days - include all days with no activity in the range
+                    // This matches the backend's missedDays calculation
                     if (hours === 0) {
-                        // Exclude the trailing open day after the last activity from gap details
-                        if (!lastActivityDate || key <= lastActivityDate) {
-                            missedDays.push(key);
-                        }
+                        missedDays.push(key);
                     }
 
                     cur.setDate(cur.getDate() + 1);

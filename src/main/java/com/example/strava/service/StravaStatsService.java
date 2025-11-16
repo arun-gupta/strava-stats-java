@@ -75,7 +75,7 @@ public class StravaStatsService {
                 .collect(Collectors.toList());
     }
 
-    public WorkoutHeatmapDto getWorkoutHeatmapSummary(List<StravaActivity> activities, LocalDate referenceDate) {
+    public WorkoutHeatmapDto getWorkoutHeatmapSummary(List<StravaActivity> activities, LocalDate referenceDate, LocalDate rangeStartFilter) {
         if (referenceDate == null) referenceDate = LocalDate.now();
 
         // Build a sorted unique set of dates with any activity
@@ -84,6 +84,7 @@ public class StravaStatsService {
                 .collect(Collectors.toCollection(TreeSet::new));
 
         if (activityDates.isEmpty()) {
+            LocalDate rangeStart = rangeStartFilter != null ? rangeStartFilter : referenceDate;
             return WorkoutHeatmapDto.builder()
                     .currentStreak(0)
                     .longestStreak(0)
@@ -92,7 +93,7 @@ public class StravaStatsService {
                     .daysSinceLast(referenceDate != null ? 0 : 0)
                     .longestGap(0)
                     .totalGapDays(0)
-                    .rangeStart(referenceDate)
+                    .rangeStart(rangeStart)
                     .rangeEnd(referenceDate)
                     .build();
         }
@@ -127,7 +128,8 @@ public class StravaStatsService {
         }
 
         // Determine range for metrics/timeline
-        LocalDate rangeStart = activityDates.first();
+        // Use filter start date if provided, otherwise use first activity date
+        LocalDate rangeStart = rangeStartFilter != null ? rangeStartFilter : activityDates.first();
         LocalDate rangeEnd = referenceDate;
         if (rangeEnd.isBefore(rangeStart)) {
             // fallback to at least cover the reference day

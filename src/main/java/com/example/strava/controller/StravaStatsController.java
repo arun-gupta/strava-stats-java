@@ -61,7 +61,7 @@ public class StravaStatsController {
 
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         LocalDate reference = (before != null) ? before : LocalDate.now();
-        return stravaStatsService.getWorkoutHeatmapSummary(activities, reference);
+        return stravaStatsService.getWorkoutHeatmapSummary(activities, reference, after);
     }
 
     @GetMapping("/run-statistics")
