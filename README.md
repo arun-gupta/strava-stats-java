@@ -36,7 +36,7 @@ Get up and running in 5 minutes:
 - **Activity Count Distribution** - Pie chart showing activity types with counts and percentages
 - **Time Distribution** - Visualize time spent per activity type in HH:MM format
 - **Workout Heatmap** - Grid-based heatmap tracking all activities with intensity coloration and streak statistics
-- **Run Stats** - Comprehensive running metrics including:
+- **Running Stats** - Comprehensive running metrics including:
   - Total runs and 10K+ runs count
   - Total miles and average pace
   - Run distance distribution histogram (0-10 miles in 1-mile ranges)
