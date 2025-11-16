@@ -522,11 +522,28 @@
                     document.getElementById('dateRangeDisplay').style.display = 'block';
                 }
 
-                let cur = new Date(start);
-                const endDate = new Date(end);
+                // Parse dates and normalize to avoid timezone issues
+                // Use local time to ensure we get the correct date
+                const parseLocalDate = (dateStr) => {
+                    const [year, month, day] = dateStr.split('-').map(Number);
+                    return new Date(year, month - 1, day);
+                };
+                const startDate = parseLocalDate(start);
+                const endDate = parseLocalDate(end);
+                let cur = new Date(startDate);
                 const missedDays = [];
-                while (cur <= endDate) {
-                    const key = cur.toISOString().slice(0,10);
+                
+                // Iterate through all days in the range (inclusive of end date)
+                // Compare dates as strings to avoid timezone issues
+                const formatDate = (d) => {
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+                
+                while (formatDate(cur) <= end) {
+                    const key = formatDate(cur);
                     const hours = byDate.get(key) || 0;
                     const lvl = hours === 0 ? 0 : (hours < 1 ? 1 : (hours < 2 ? 2 : 3));
                     const box = document.createElement('div');
@@ -540,6 +557,7 @@
                         missedDays.push(key);
                     }
 
+                    // Move to next day
                     cur.setDate(cur.getDate() + 1);
                 }
 
