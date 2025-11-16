@@ -53,31 +53,31 @@ Click on any thumbnail to view the full image:
 <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
   <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
     <strong>Activity Count</strong><br>
-    <a href="docs/images/activity-count.png"><img src="docs/images/activity-count.png" alt="Activity Count" style="width: 100%; max-width: 400px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
+    <a href="docs/images/activity-count.png"><img src="docs/images/activity-count.png" alt="Activity Count" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
   </div>
   <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
     <strong>Time Distribution</strong><br>
-    <a href="docs/images/time-distribution.png"><img src="docs/images/time-distribution.png" alt="Time Distribution" style="width: 100%; max-width: 400px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
+    <a href="docs/images/time-distribution.png"><img src="docs/images/time-distribution.png" alt="Time Distribution" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
   </div>
   <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
     <strong>Workout Heatmap</strong><br>
-    <a href="docs/images/workout-heatmap.png"><img src="docs/images/workout-heatmap.png" alt="Workout Heatmap" style="width: 100%; max-width: 400px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
+    <a href="docs/images/workout-heatmap.png"><img src="docs/images/workout-heatmap.png" alt="Workout Heatmap" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
   </div>
   <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
     <strong>Running Heatmap</strong><br>
-    <a href="docs/images/running-heatmap.png"><img src="docs/images/running-heatmap.png" alt="Running Heatmap" style="width: 100%; max-width: 400px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
+    <a href="docs/images/running-heatmap.png"><img src="docs/images/running-heatmap.png" alt="Running Heatmap" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
   </div>
   <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
     <strong>Running Stats</strong><br>
-    <a href="docs/images/running-stats.png"><img src="docs/images/running-stats.png" alt="Running Stats" style="width: 100%; max-width: 400px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
+    <a href="docs/images/running-stats.png"><img src="docs/images/running-stats.png" alt="Running Stats" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
   </div>
   <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
     <strong>Mileage Trend</strong><br>
-    <a href="docs/images/mileage-trend.png"><img src="docs/images/mileage-trend.png" alt="Mileage Trend" style="width: 100%; max-width: 400px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
+    <a href="docs/images/mileage-trend.png"><img src="docs/images/mileage-trend.png" alt="Mileage Trend" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
   </div>
   <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
     <strong>Pace Trend</strong><br>
-    <a href="docs/images/pace-trend.png"><img src="docs/images/pace-trend.png" alt="Pace Trend" style="width: 100%; max-width: 400px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
+    <a href="docs/images/pace-trend.png"><img src="docs/images/pace-trend.png" alt="Pace Trend" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
   </div>
 </div>
 
