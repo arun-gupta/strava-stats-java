@@ -50,26 +50,23 @@ Get up and running in 5 minutes:
 
 Click on any thumbnail to view the full image:
 
-### Activity Count
-<a href="docs/images/activity-count.png"><img src="docs/images/activity-count.png" alt="Activity Count" width="400"></a>
-
-### Time Distribution
-<a href="docs/images/time-distribution.png"><img src="docs/images/time-distribution.png" alt="Time Distribution" width="400"></a>
-
-### Workout Heatmap
-<a href="docs/images/workout-heatmap.png"><img src="docs/images/workout-heatmap.png" alt="Workout Heatmap" width="400"></a>
-
-### Running Heatmap
-<a href="docs/images/running-heatmap.png"><img src="docs/images/running-heatmap.png" alt="Running Heatmap" width="400"></a>
-
-### Running Stats
-<a href="docs/images/running-stats.png"><img src="docs/images/running-stats.png" alt="Running Stats" width="400"></a>
-
-### Mileage Trend
-<a href="docs/images/mileage-trend.png"><img src="docs/images/mileage-trend.png" alt="Mileage Trend" width="400"></a>
-
-### Pace Trend
-<a href="docs/images/pace-trend.png"><img src="docs/images/pace-trend.png" alt="Pace Trend" width="400"></a>
+<table>
+<tr>
+<td align="center"><strong>Activity Count</strong><br><a href="docs/images/activity-count.png"><img src="docs/images/activity-count.png" alt="Activity Count" width="300"></a></td>
+<td align="center"><strong>Time Distribution</strong><br><a href="docs/images/time-distribution.png"><img src="docs/images/time-distribution.png" alt="Time Distribution" width="300"></a></td>
+<td align="center"><strong>Workout Heatmap</strong><br><a href="docs/images/workout-heatmap.png"><img src="docs/images/workout-heatmap.png" alt="Workout Heatmap" width="300"></a></td>
+</tr>
+<tr>
+<td align="center"><strong>Running Heatmap</strong><br><a href="docs/images/running-heatmap.png"><img src="docs/images/running-heatmap.png" alt="Running Heatmap" width="300"></a></td>
+<td align="center"><strong>Running Stats</strong><br><a href="docs/images/running-stats.png"><img src="docs/images/running-stats.png" alt="Running Stats" width="300"></a></td>
+<td align="center"><strong>Mileage Trend</strong><br><a href="docs/images/mileage-trend.png"><img src="docs/images/mileage-trend.png" alt="Mileage Trend" width="300"></a></td>
+</tr>
+<tr>
+<td align="center"><strong>Pace Trend</strong><br><a href="docs/images/pace-trend.png"><img src="docs/images/pace-trend.png" alt="Pace Trend" width="300"></a></td>
+<td></td>
+<td></td>
+</tr>
+</table>
 
 ## Documentation
 
