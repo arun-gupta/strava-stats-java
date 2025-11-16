@@ -29,6 +29,14 @@ public class HomeController {
 
     @GetMapping("/error")
     public String handleError(HttpServletRequest request, Model model) {
+        // Check if error message was stored in session by AuthenticationFailureHandler
+        String sessionErrorMessage = (String) request.getSession().getAttribute("errorMessage");
+        if (sessionErrorMessage != null) {
+            request.getSession().removeAttribute("errorMessage");
+            model.addAttribute("errorMessage", sessionErrorMessage);
+            return "error";
+        }
+        
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
