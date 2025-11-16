@@ -51,25 +51,25 @@ Get up and running in 5 minutes:
 Click on any thumbnail to view the full image:
 
 ### Activity Count
-[![Activity Count](docs/images/activity-count.png)](docs/images/activity-count.png)
+<a href="docs/images/activity-count.png"><img src="docs/images/activity-count.png" alt="Activity Count" width="400"></a>
 
 ### Time Distribution
-[![Time Distribution](docs/images/time-distribution.png)](docs/images/time-distribution.png)
+<a href="docs/images/time-distribution.png"><img src="docs/images/time-distribution.png" alt="Time Distribution" width="400"></a>
 
 ### Workout Heatmap
-[![Workout Heatmap](docs/images/workout-heatmap.png)](docs/images/workout-heatmap.png)
+<a href="docs/images/workout-heatmap.png"><img src="docs/images/workout-heatmap.png" alt="Workout Heatmap" width="400"></a>
 
 ### Running Heatmap
-[![Running Heatmap](docs/images/running-heatmap.png)](docs/images/running-heatmap.png)
+<a href="docs/images/running-heatmap.png"><img src="docs/images/running-heatmap.png" alt="Running Heatmap" width="400"></a>
 
 ### Running Stats
-[![Running Stats](docs/images/running-stats.png)](docs/images/running-stats.png)
+<a href="docs/images/running-stats.png"><img src="docs/images/running-stats.png" alt="Running Stats" width="400"></a>
 
 ### Mileage Trend
-[![Mileage Trend](docs/images/mileage-trend.png)](docs/images/mileage-trend.png)
+<a href="docs/images/mileage-trend.png"><img src="docs/images/mileage-trend.png" alt="Mileage Trend" width="400"></a>
 
 ### Pace Trend
-[![Pace Trend](docs/images/pace-trend.png)](docs/images/pace-trend.png)
+<a href="docs/images/pace-trend.png"><img src="docs/images/pace-trend.png" alt="Pace Trend" width="400"></a>
 
 ## Documentation
 
