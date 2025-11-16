@@ -519,10 +519,21 @@
                 }
 
                 // Build timeline and collect gap information
-                const byDate = new Map(heat.map(h => [h.date, h.value]));
+                // Ensure date is always a string in YYYY-MM-DD format for consistent matching
+                const byDate = new Map(heat.map(h => {
+                    const dateStr = typeof h.date === 'string' ? h.date : 
+                        (h.date.year + '-' + String(h.date.month).padStart(2, '0') + '-' + String(h.date.day).padStart(2, '0'));
+                    return [dateStr, h.value];
+                }));
                 
                 // Use backend range (which uses the exact filter dates)
-                const start = s.rangeStart || (heat.length ? heat[0].date : null);
+                // Normalize start date if coming from heatmap data
+                let start = s.rangeStart;
+                if (!start && heat.length > 0) {
+                    const firstDate = heat[0].date;
+                    start = typeof firstDate === 'string' ? firstDate : 
+                        (firstDate.year + '-' + String(firstDate.month).padStart(2, '0') + '-' + String(firstDate.day).padStart(2, '0'));
+                }
                 const end = s.rangeEnd;
                 const timeline = document.getElementById('workoutTimeline');
                 timeline.innerHTML = '';
