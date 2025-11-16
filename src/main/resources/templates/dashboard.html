@@ -933,9 +933,10 @@
         function setDateRangeYTD() {
             const today = new Date();
             const endDate = today.toISOString().split('T')[0];
-            // Set start date to January 1st of the current year
-            const startDate = new Date(today.getFullYear(), 0, 1);
-            document.getElementById('afterDate').value = startDate.toISOString().split('T')[0];
+            // Set start date to January 1st of the current year (format as YYYY-MM-DD to avoid timezone issues)
+            const year = today.getFullYear();
+            const startDate = `${year}-01-01`;
+            document.getElementById('afterDate').value = startDate;
             document.getElementById('beforeDate').value = endDate;
             // Apply the filter
             loadAllData();
