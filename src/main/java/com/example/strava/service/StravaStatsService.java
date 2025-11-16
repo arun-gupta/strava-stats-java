@@ -143,7 +143,6 @@ public class StravaStatsService {
         }
 
         int totalDays = (int) (ChronoUnit.DAYS.between(rangeStart, rangeEnd) + 1);
-        int missedDays = Math.max(totalDays - workoutDays, 0);
 
         // Days since last activity up to rangeEnd
         NavigableSet<LocalDate> uptoEnd = activityDates.headSet(rangeEnd, true);
@@ -153,11 +152,26 @@ public class StravaStatsService {
         int daysSinceLast = lastActivityOnOrBeforeEnd == null ? totalDays
                 : (int) ChronoUnit.DAYS.between(lastActivityOnOrBeforeEnd, rangeEnd);
 
-        // Compute gaps inside the range
+        // Missed days: exclude the trailing open period after the last activity day
+        LocalDate metricsEndInclusive = lastActivityOnOrBeforeEnd != null ? lastActivityOnOrBeforeEnd : rangeEnd;
+        int workoutDaysThroughMetricsEnd = 0;
+        for (LocalDate d : activityDates) {
+            if (!d.isBefore(rangeStart) && !d.isAfter(metricsEndInclusive)) {
+                workoutDaysThroughMetricsEnd++;
+            }
+        }
+        int totalDaysThroughMetricsEnd = (int) (ChronoUnit.DAYS.between(rangeStart, metricsEndInclusive) + 1);
+        int missedDays = Math.max(totalDaysThroughMetricsEnd - workoutDaysThroughMetricsEnd, 0);
+
+        // Compute gaps inside the range.
+        // Important: do not count the trailing "open" gap after the last activity day.
+        // Strava's gaps typically refer to completed no-activity periods between workouts,
+        // not the days since the most recent workout up to today.
         int longestGap = 0;
         int totalGapDays = 0;
         int currentGap = 0;
-        for (LocalDate day = rangeStart; !day.isAfter(rangeEnd); day = day.plusDays(1)) {
+        LocalDate gapEndInclusive = lastActivityOnOrBeforeEnd != null ? lastActivityOnOrBeforeEnd : rangeEnd;
+        for (LocalDate day = rangeStart; !day.isAfter(gapEndInclusive); day = day.plusDays(1)) {
             if (!activityDates.contains(day)) {
                 currentGap++;
                 totalGapDays++;

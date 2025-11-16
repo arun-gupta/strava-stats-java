@@ -493,7 +493,9 @@
                 // Build timeline and collect gap information
                 const byDate = new Map(heat.map(h => [h.date, h.value]));
                 const start = s.rangeStart || (heat.length ? heat[0].date : null);
-                const end = s.rangeEnd || (heat.length ? heat[heat.length - 1].date : null);
+                // End at the last activity date to avoid counting the trailing open period
+                const lastActivityDate = heat.length ? heat[heat.length - 1].date : null;
+                const end = lastActivityDate || s.rangeEnd;
                 const timeline = document.getElementById('workoutTimeline');
                 timeline.innerHTML = '';
                 if (!start || !end) {
