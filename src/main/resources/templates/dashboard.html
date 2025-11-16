@@ -900,8 +900,10 @@
             return colors.slice(0, count);
         }
 
-        // Load data on page load
-        window.addEventListener('load', loadAllData);
+        // Load data on page load with default 30 days
+        window.addEventListener('load', function() {
+            setDateRange(30); // Default to last 30 days
+        });
     </script>
 </body>
 </html>
