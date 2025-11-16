@@ -493,9 +493,9 @@
                 // Build timeline and collect gap information
                 const byDate = new Map(heat.map(h => [h.date, h.value]));
                 const start = s.rangeStart || (heat.length ? heat[0].date : null);
-                // End at the last activity date to avoid counting the trailing open period
                 const lastActivityDate = heat.length ? heat[heat.length - 1].date : null;
-                const end = lastActivityDate || s.rangeEnd;
+                // Render through the full requested end date for range consistency
+                const end = s.rangeEnd;
                 const timeline = document.getElementById('workoutTimeline');
                 timeline.innerHTML = '';
                 if (!start || !end) {
@@ -536,7 +536,10 @@
 
                     // Collect missed days
                     if (hours === 0) {
-                        missedDays.push(key);
+                        // Exclude the trailing open day after the last activity from gap details
+                        if (!lastActivityDate || key <= lastActivityDate) {
+                            missedDays.push(key);
+                        }
                     }
 
                     cur.setDate(cur.getDate() + 1);

@@ -152,16 +152,8 @@ public class StravaStatsService {
         int daysSinceLast = lastActivityOnOrBeforeEnd == null ? totalDays
                 : (int) ChronoUnit.DAYS.between(lastActivityOnOrBeforeEnd, rangeEnd);
 
-        // Missed days: exclude the trailing open period after the last activity day
-        LocalDate metricsEndInclusive = lastActivityOnOrBeforeEnd != null ? lastActivityOnOrBeforeEnd : rangeEnd;
-        int workoutDaysThroughMetricsEnd = 0;
-        for (LocalDate d : activityDates) {
-            if (!d.isBefore(rangeStart) && !d.isAfter(metricsEndInclusive)) {
-                workoutDaysThroughMetricsEnd++;
-            }
-        }
-        int totalDaysThroughMetricsEnd = (int) (ChronoUnit.DAYS.between(rangeStart, metricsEndInclusive) + 1);
-        int missedDays = Math.max(totalDaysThroughMetricsEnd - workoutDaysThroughMetricsEnd, 0);
+        // Missed days over the full requested range (for consistency with displayed range).
+        int missedDays = Math.max(totalDays - workoutDays, 0);
 
         // Compute gaps inside the range.
         // Important: do not count the trailing "open" gap after the last activity day.
