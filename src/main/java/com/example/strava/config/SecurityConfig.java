@@ -30,6 +30,7 @@ public class SecurityConfig {
                     .accessTokenResponseClient(accessTokenResponseClient)
                 )
                 .defaultSuccessUrl("/dashboard", true)
+                .failureUrl("/error")
             );
         return http.build();
     }
