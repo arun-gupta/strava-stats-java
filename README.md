@@ -44,7 +44,32 @@ Get up and running in 5 minutes:
   - Personal records (fastest mile, fastest 10K, longest run, most elevation)
 - **Mileage Trend** - Daily/Weekly/Monthly running mileage charts with smooth curves and tooltips
 - **Pace Trend** - Daily/Weekly/Monthly average pace displayed in MM:SS format
-- **Date Range Filtering** - Quick pick buttons (7 days, 30 days, 90 days, 6 months, 1 year, All Time) and custom date range selection
+- **Date Range Filtering** - Quick pick buttons (7 days, 30 days, 90 days, 6 months, 1 year, YTD, All Time) and custom date range selection
+
+## Screenshots
+
+Click on any thumbnail to view the full image:
+
+### Activity Count
+[![Activity Count](docs/images/activity-count.png)](docs/images/activity-count.png)
+
+### Time Distribution
+[![Time Distribution](docs/images/time-distribution.png)](docs/images/time-distribution.png)
+
+### Workout Heatmap
+[![Workout Heatmap](docs/images/workout-heatmap.png)](docs/images/workout-heatmap.png)
+
+### Running Heatmap
+[![Running Heatmap](docs/images/running-heatmap.png)](docs/images/running-heatmap.png)
+
+### Running Stats
+[![Running Stats](docs/images/running-stats.png)](docs/images/running-stats.png)
+
+### Mileage Trend
+[![Mileage Trend](docs/images/mileage-trend.png)](docs/images/mileage-trend.png)
+
+### Pace Trend
+[![Pace Trend](docs/images/pace-trend.png)](docs/images/pace-trend.png)
 
 ## Documentation
 
