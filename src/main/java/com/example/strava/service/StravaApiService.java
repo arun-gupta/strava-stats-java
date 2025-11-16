@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -58,7 +59,45 @@ public class StravaApiService {
     }
 
     public List<StravaActivity> getAllActivities(String principalName, LocalDate after, LocalDate before) {
-        // Fetch up to 200 activities (Strava's max per page is 200)
-        return getActivities(principalName, after, before, 200);
+        // Strava API returns activities in reverse chronological order (newest first)
+        // It only returns up to 200 activities per call. To get all activities, we need to
+        // make multiple calls with adjusted date ranges, using the oldest activity's date
+        // as the new 'before' date for the next call.
+        List<StravaActivity> allActivities = new ArrayList<>();
+        int perPage = 200; // Strava's max per page
+        LocalDate currentBefore = before;
+        int maxIterations = 50; // Safety limit to prevent infinite loops
+        int iteration = 0;
+        
+        while (iteration < maxIterations) {
+            List<StravaActivity> pageActivities = getActivities(principalName, after, currentBefore, perPage);
+            
+            if (pageActivities == null || pageActivities.isEmpty()) {
+                break; // No more activities
+            }
+            
+            allActivities.addAll(pageActivities);
+            
+            // If we got fewer than perPage activities, we've reached the end
+            if (pageActivities.size() < perPage) {
+                break;
+            }
+            
+            // Get the oldest activity from this page (last in the list since it's reverse chronological)
+            StravaActivity oldestActivity = pageActivities.get(pageActivities.size() - 1);
+            LocalDate oldestActivityDate = oldestActivity.getStartDateLocal().toLocalDate();
+            
+            // Check if we've reached the start of our date range
+            if (after != null && (oldestActivityDate.isBefore(after) || oldestActivityDate.equals(after))) {
+                break; // We've reached or passed our start date
+            }
+            
+            // For the next iteration, set 'before' to one day before the oldest activity
+            // This ensures we get the next batch of older activities
+            currentBefore = oldestActivityDate.minusDays(1);
+            iteration++;
+        }
+        
+        return allActivities;
     }
 }
