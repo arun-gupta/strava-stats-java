@@ -36,12 +36,12 @@ Get up and running in 5 minutes:
 - **Activity Count Distribution** - Pie chart showing activity types with counts and percentages
 - **Time Distribution** - Visualize time spent per activity type in HH:MM format
 - **Workout Heatmap** - Grid-based heatmap tracking all activities with intensity coloration and streak statistics
+- **Running Heatmap** - Grid-based calendar view with color-coded daily mileage intensity and running streak statistics
 - **Running Stats** - Comprehensive running metrics including:
   - Total runs and 10K+ runs count
   - Total miles and average pace
   - Run distance distribution histogram (0-10 miles in 1-mile ranges)
   - Personal records (fastest mile, fastest 10K, longest run, most elevation)
-- **Running Heatmap** - Grid-based calendar view with color-coded daily mileage intensity and running streak statistics
 - **Mileage Trend** - Daily/Weekly/Monthly running mileage charts with smooth curves and tooltips
 - **Pace Trend** - Daily/Weekly/Monthly average pace displayed in MM:SS format
 - **Date Range Filtering** - Quick pick buttons (7 days, 30 days, 90 days, 6 months, 1 year, All Time) and custom date range selection
