@@ -23,8 +23,8 @@ public class OAuth2Config {
                 new FormHttpMessageConverter(),
                 new OAuth2AccessTokenResponseHttpMessageConverter()));
 
-        // Use default error handler to avoid OAuth2 error format parsing issues
-        restTemplate.setErrorHandler(new org.springframework.web.client.DefaultResponseErrorHandler());
+        // Use OAuth2 error handler to properly handle OAuth2 error responses
+        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
 
         client.setRestOperations(restTemplate);
         return client;
