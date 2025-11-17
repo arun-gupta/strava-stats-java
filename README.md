@@ -85,6 +85,8 @@ Click on any thumbnail to view the full image:
 
 For detailed setup instructions, configuration options, API documentation, and troubleshooting, see [SETUP.md](SETUP.md).
 
+To recreate this application in any language or stack, see the language-agnostic [requirements.md](docs/requirements.md).
+
 ## Technology Stack
 
 - **Spring Boot 3.5.7** - Application framework
