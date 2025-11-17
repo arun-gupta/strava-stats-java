@@ -585,7 +585,18 @@
                     const lvl = hours === 0 ? 0 : (hours < 1 ? 1 : (hours < 2 ? 2 : 3));
                     const box = document.createElement('div');
                     box.className = 'day-cell lvl-' + lvl;
-                    box.title = key + (hours ? ` — ${hours.toFixed(2)}h` : ' — No activity');
+
+                    // Format time as HH:MM
+                    let timeStr = '';
+                    if (hours > 0) {
+                        const h = Math.floor(hours);
+                        const m = Math.round((hours - h) * 60);
+                        timeStr = ` — ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                    } else {
+                        timeStr = ' — No activity';
+                    }
+
+                    box.title = key + timeStr;
                     timeline.appendChild(box);
 
                     // Collect missed days - all days with no activity in the selected range
