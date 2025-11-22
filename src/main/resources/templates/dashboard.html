@@ -161,7 +161,7 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="streaks-tab" data-bs-toggle="tab"
                         data-bs-target="#streaks" type="button" role="tab">
-                    🗺️ Heatmap
+                    🔥 Heatmap
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -294,6 +294,18 @@
                                 <div class="col-6 col-md-3 mb-2">
                                     <div class="h3 mb-0" id="longestRunGap">0</div>
                                     <div class="text-muted small">Longest Gap</div>
+                                </div>
+                            </div>
+                            <p class="mt-2" id="runningConsistencyMsg"></p>
+                            <div class="mt-3" id="showRunningGapDetailsContainer" style="display: none;">
+                                <button class="btn btn-sm btn-outline-primary" onclick="toggleRunningGapDetails()">
+                                    <span id="runningGapDetailsToggleText">Show Gap Details</span>
+                                </button>
+                            </div>
+                            <div class="mt-3" id="runningGapDetailsSection" style="display: none;">
+                                <div class="alert alert-warning">
+                                    <h6 class="alert-heading">Missed Running Days:</h6>
+                                    <div id="runningGapDetailsList"></div>
                                 </div>
                             </div>
                         </section>
@@ -645,6 +657,32 @@
             }
         }
 
+        function toggleRunningGapDetails() {
+            const section = document.getElementById('runningGapDetailsSection');
+            const toggleText = document.getElementById('runningGapDetailsToggleText');
+
+            if (section.style.display === 'none') {
+                // Show gap details
+                const missedDays = window.runningMissedDays || [];
+                const listDiv = document.getElementById('runningGapDetailsList');
+
+                if (missedDays.length === 0) {
+                    listDiv.textContent = 'No missed running days found.';
+                } else {
+                    listDiv.innerHTML = '<ul class="mb-0">' +
+                        missedDays.map(day => `<li>${day}</li>`).join('') +
+                        '</ul>';
+                }
+
+                section.style.display = 'block';
+                toggleText.textContent = 'Hide Gap Details';
+            } else {
+                // Hide gap details
+                section.style.display = 'none';
+                toggleText.textContent = 'Show Gap Details';
+            }
+        }
+
         function loadRunStatistics() {
             fetch('/api/stats/run-statistics' + getDateParams())
                 .then(response => response.json())
@@ -784,6 +822,7 @@
                     }
 
                     // Build timeline and calculate stats over the full range
+                    const missedRunningDays = [];
                     cur = new Date(startDate);
                     while (true) {
                         const key = formatLocalDate(cur);
@@ -801,6 +840,7 @@
                         } else {
                             nonRunningDays++;
                             currentGap++;
+                            missedRunningDays.push(key);
                             if (currentGap > longestGap) {
                                 longestGap = currentGap;
                             }
@@ -815,6 +855,25 @@
                     document.getElementById('nonRunningDays').textContent = nonRunningDays;
                     document.getElementById('currentRunStreak').textContent = currentStreak;
                     document.getElementById('longestRunGap').textContent = longestGap;
+
+                    // Show/hide gap details button
+                    const msg = document.getElementById('runningConsistencyMsg');
+                    if (nonRunningDays === 0) {
+                        msg.className = 'text-success';
+                        msg.textContent = 'Perfect! You ran every day!';
+                        document.getElementById('showRunningGapDetailsContainer').style.display = 'none';
+                    } else if (currentStreak >= 7) {
+                        msg.className = 'text-success';
+                        msg.textContent = 'Great running streak!';
+                        document.getElementById('showRunningGapDetailsContainer').style.display = 'block';
+                    } else {
+                        msg.className = 'text-muted';
+                        msg.textContent = 'Keep building your running routine!';
+                        document.getElementById('showRunningGapDetailsContainer').style.display = 'block';
+                    }
+
+                    // Store missed days for the toggle function
+                    window.runningMissedDays = missedRunningDays;
                 });
         }
 
