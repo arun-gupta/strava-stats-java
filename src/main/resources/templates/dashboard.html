@@ -79,6 +79,18 @@
         </div>
     </nav>
 
+    <!-- Error Toast Container -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastMessage">
+                    An error occurred. Please try again.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <div class="container mt-4">
 
         <!-- Date Range Filter -->
@@ -367,6 +379,20 @@
         let activityCountChart, timeDistChart, mileageTrendChart, paceTrendChart, runDistributionChart;
         let currentTrendPeriod = 'daily';
 
+        // Error handling helper
+        function showErrorToast(message) {
+            const toastElement = document.getElementById('errorToast');
+            const messageElement = document.getElementById('errorToastMessage');
+            messageElement.textContent = message;
+            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+            toast.show();
+        }
+
+        function handleFetchError(error, context) {
+            console.error(`Error loading ${context}:`, error);
+            showErrorToast(`Unable to load ${context}. Please try again.`);
+        }
+
         function getDateParams() {
             const after = document.getElementById('afterDate').value;
             const before = document.getElementById('beforeDate').value;
@@ -381,7 +407,10 @@
 
         function loadActivityCount() {
             fetch('/api/stats/activity-count' + getDateParams())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     const ctx = document.getElementById('activityCountChart').getContext('2d');
                     if (activityCountChart) activityCountChart.destroy();
@@ -425,12 +454,16 @@
                             }
                         }
                     });
-                });
+                })
+                .catch(error => handleFetchError(error, 'activity count'));
         }
 
         function loadTimeDistribution() {
             fetch('/api/stats/time-distribution' + getDateParams())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     const ctx = document.getElementById('timeDistChart').getContext('2d');
                     if (timeDistChart) timeDistChart.destroy();
@@ -503,13 +536,22 @@
                             }
                         }
                     });
-                });
+                })
+                .catch(error => handleFetchError(error, 'time distribution'));
         }
 
         function loadWorkoutHeatmap() {
             const params = getDateParams();
-            const heatReq = fetch('/api/stats/workout-heatmap' + params).then(r => r.json());
-            const sumReq = fetch('/api/stats/workout-heatmap/summary' + params).then(r => r.json());
+            const heatReq = fetch('/api/stats/workout-heatmap' + params)
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                });
+            const sumReq = fetch('/api/stats/workout-heatmap/summary' + params)
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                });
             Promise.all([heatReq, sumReq]).then(([heat, s]) => {
                 // Counters
                 const setNum = (id, val) => document.getElementById(id).innerText = (val ?? 0);
@@ -628,7 +670,8 @@
 
                 // Store missed days globally for the toggle function
                 window.workoutMissedDays = missedDays;
-            });
+            })
+            .catch(error => handleFetchError(error, 'workout heatmap'));
         }
 
         function toggleGapDetails() {
@@ -685,7 +728,10 @@
 
         function loadRunStatistics() {
             fetch('/api/stats/run-statistics' + getDateParams())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     const container = document.getElementById('runStatsContent');
                     container.innerHTML = `
@@ -700,12 +746,16 @@
                     `;
                     // Also load the run distribution chart
                     loadRunDistribution();
-                });
+                })
+                .catch(error => handleFetchError(error, 'running statistics'));
         }
 
         function loadRunDistribution() {
             fetch('/api/stats/run-distribution' + getDateParams())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     const ctx = document.getElementById('runDistributionChart').getContext('2d');
                     if (runDistributionChart) runDistributionChart.destroy();
@@ -747,12 +797,16 @@
                             }
                         }
                     });
-                });
+                })
+                .catch(error => handleFetchError(error, 'run distribution'));
         }
 
         function loadRunningHeatmap() {
             fetch('/api/stats/running-heatmap' + getDateParams())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     const container = document.getElementById('runningHeatmap');
                     container.innerHTML = '';
@@ -874,14 +928,18 @@
 
                     // Store missed days for the toggle function
                     window.runningMissedDays = missedRunningDays;
-                });
+                })
+                .catch(error => handleFetchError(error, 'running heatmap'));
         }
 
         function loadMileageTrend(period) {
             // Currently backend mileage-trend is across activities; for 'running' mode we keep same API
             // In the future, backend can support a mode param; for now just pass period and date range
             fetch('/api/stats/mileage-trend' + getDateParams() + (getDateParams() ? '&' : '?') + 'period=' + period)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     const ctx = document.getElementById('mileageTrendChart').getContext('2d');
                     if (mileageTrendChart) mileageTrendChart.destroy();
@@ -930,13 +988,17 @@
                             }
                         }
                     });
-                });
+                })
+                .catch(error => handleFetchError(error, 'mileage trend'));
         }
 
         function loadPaceTrend(period) {
             // Pace trend is inherently running-focused; we reuse same endpoint for both modes
             fetch('/api/stats/pace-trend' + getDateParams() + (getDateParams() ? '&' : '?') + 'period=' + period)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     const ctx = document.getElementById('paceTrendChart').getContext('2d');
                     if (paceTrendChart) paceTrendChart.destroy();
@@ -994,7 +1056,8 @@
                             }
                         }
                     });
-                });
+                })
+                .catch(error => handleFetchError(error, 'pace trend'));
         }
 
         function setActiveQuickPick(activeId) {
@@ -1078,7 +1141,10 @@
 
         function loadSummaryStats() {
             fetch('/api/stats/summary' + getDateParams())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     document.getElementById('displayTotalActivities').textContent = data.totalActivities;
 
@@ -1089,7 +1155,8 @@
                     const timeStr = `${hours}h ${minutes}m ${seconds}s`;
 
                     document.getElementById('displayTotalMovingTime').textContent = timeStr;
-                });
+                })
+                .catch(error => handleFetchError(error, 'summary stats'));
         }
 
         function loadAllData() {
