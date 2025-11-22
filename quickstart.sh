@@ -104,6 +104,9 @@ export STRAVA_CLIENT_ID="$CLIENT_ID"
 export STRAVA_CLIENT_SECRET="$CLIENT_SECRET"
 
 SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
+# Belt & suspenders: export active profile so the JVM sees it even if Gradle plugin
+# ignores -Dspring-boot.run.profiles on this environment.
+export SPRING_PROFILES_ACTIVE
 REBUILD=false
 OPEN_BROWSER=true
 
@@ -126,9 +129,11 @@ CMD=("./gradlew")
 if [[ "$REBUILD" == "true" ]]; then
   CMD+=(clean)
 fi
-CMD+=(bootRun "-Dspring-boot.run.profiles=${SPRING_PROFILES_ACTIVE}")
+# Pass profile via both JVM system property and Boot run arguments for compatibility
+CMD+=(bootRun "-Dspring-boot.run.profiles=${SPRING_PROFILES_ACTIVE}" "-Dspring-boot.run.arguments=--spring.profiles.active=${SPRING_PROFILES_ACTIVE}")
 
 echo "Starting Strava Activity Analyzer with profile=${SPRING_PROFILES_ACTIVE}…"
+echo "(SPRING_PROFILES_ACTIVE env)=${SPRING_PROFILES_ACTIVE}"
 echo "Credentials source: ${CRED_SOURCE}"
 if [[ -n "${STRAVA_CLIENT_ID}" ]]; then
   echo "Using STRAVA_CLIENT_ID=${STRAVA_CLIENT_ID}"
