@@ -2,6 +2,24 @@
 
 A Spring Boot application for analyzing Strava activities with comprehensive statistics and visualizations.
 
+## Features
+
+- **Secure Strava OAuth Authentication** - Login with your Strava account
+- **Overview** - Pie chart showing activity types with counts and percentages
+- **Duration** - Visualize time spent per activity type in HH:MM format
+- **Heatmap** - Toggle between:
+  - **All Activities**: grid heatmap of any-activity days with streak counters and gap details
+  - **Running**: calendar-like daily mileage heatmap with running streak counters
+- **Trends** - Daily/Weekly/Monthly charts with smooth curves for:
+  - Running mileage with tooltips
+  - Average pace in MM:SS format
+- **Running Stats** - Comprehensive running metrics including:
+  - Total runs and 10K+ runs count
+  - Total miles and average pace
+  - Run distance distribution histogram (0-10 miles in 1-mile ranges)
+  - Personal records (fastest mile, fastest 10K, longest run, most elevation)
+- **Date Range Filtering** - Quick pick buttons (7 days, 30 days, 90 days, 6 months, 1 year, YTD, All Time) and custom date range selection
+
 ## Quickstart
 
 1. **Create a Strava API application**
@@ -23,24 +41,6 @@ A Spring Boot application for analyzing Strava activities with comprehensive sta
 4. **Connect with Strava and start analyzing!**
 
 > Requires Java 21. See [SETUP.md](SETUP.md) for detailed instructions.
-
-## Features
-
-- **Secure Strava OAuth Authentication** - Login with your Strava account
-- **Overview** - Pie chart showing activity types with counts and percentages
-- **Duration** - Visualize time spent per activity type in HH:MM format
-- **Heatmap** - Toggle between:
-  - **All Activities**: grid heatmap of any-activity days with streak counters and gap details
-  - **Running**: calendar-like daily mileage heatmap with running streak counters
-- **Trends** - Daily/Weekly/Monthly charts with smooth curves for:
-  - Running mileage with tooltips
-  - Average pace in MM:SS format
-- **Running Stats** - Comprehensive running metrics including:
-  - Total runs and 10K+ runs count
-  - Total miles and average pace
-  - Run distance distribution histogram (0-10 miles in 1-mile ranges)
-  - Personal records (fastest mile, fastest 10K, longest run, most elevation)
-- **Date Range Filtering** - Quick pick buttons (7 days, 30 days, 90 days, 6 months, 1 year, YTD, All Time) and custom date range selection
 
 ## Screenshots
 
