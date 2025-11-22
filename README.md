@@ -11,15 +11,37 @@ Get up and running in 5 minutes:
    - Create a new application with callback domain: `localhost`
    - Note your Client ID and Client Secret
 
-2. **Set up credentials**
+2. **Set up credentials (local profile)**
+   Use the provided template. `quickstart.sh` will look for credentials in this order:
+   1) `src/main/resources/application-local.properties` (preferred)
+   2) Environment variables (`STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`)
    ```bash
-   export STRAVA_CLIENT_ID=your-client-id
-   export STRAVA_CLIENT_SECRET=your-client-secret
+   # 2a) Create a local profile config from the template
+   cp src/main/resources/application.properties src/main/resources/application-local.properties
+
+   # 2b) Option A — set credentials in application-local.properties (preferred)
+   # Open the file and set the Spring OAuth properties, for example:
+   # spring.security.oauth2.client.registration.strava.client-id=your-client-id
+   # spring.security.oauth2.client.registration.strava.client-secret=your-client-secret
+
+   # 2c) Option B — use environment variables (fallback if properties are not set)
+   # export STRAVA_CLIENT_ID=your-client-id
+   # export STRAVA_CLIENT_SECRET=your-client-secret
    ```
 
+   Notes:
+   - You can keep secrets in the properties file (preferred for local dev) or in env vars (useful for CI/temporary shells). The script will pick up whichever is available based on the precedence above.
+   - If you use environment variables only, you don’t have to edit the properties file; `application.properties` already contains `${STRAVA_CLIENT_ID}` and `${STRAVA_CLIENT_SECRET}` placeholders.
+   - Avoid committing real credentials to source control.
+
 3. **Run the application**
+   Fastest way:
    ```bash
-   ./gradlew bootRun
+   ./quickstart.sh
+   ```
+   Or, via Gradle:
+   ```bash
+   ./gradlew bootRun -Dspring-boot.run.profiles=local
    ```
 
 4. **Access the dashboard**
@@ -35,8 +57,9 @@ Get up and running in 5 minutes:
 - **Secure Strava OAuth Authentication** - Login with your Strava account
 - **Activity Count Distribution** - Pie chart showing activity types with counts and percentages
 - **Time Distribution** - Visualize time spent per activity type in HH:MM format
-- **Workout Heatmap** - Grid-based heatmap tracking all activities with intensity coloration and streak statistics
-- **Running Heatmap** - Grid-based calendar view with color-coded daily mileage intensity and running streak statistics
+- **Streaks (toggleable)** - One tab with a toggle to switch between:
+  - **All Activities** (formerly Workout Heatmap): grid heatmap of any-activity days with streak counters and gap details
+  - **Running** (formerly Running Heatmap): calendar-like daily mileage heatmap with running streak counters
 - **Running Stats** - Comprehensive running metrics including:
   - Total runs and 10K+ runs count
   - Total miles and average pace

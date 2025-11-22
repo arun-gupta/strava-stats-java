@@ -144,15 +144,9 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="workout-heatmap-tab" data-bs-toggle="tab"
-                        data-bs-target="#workout-heatmap" type="button" role="tab">
-                    💪 Workout Heatmap
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="running-heatmap-tab" data-bs-toggle="tab"
-                        data-bs-target="#running-heatmap" type="button" role="tab">
-                    🔥 Running Heatmap
+                <button class="nav-link" id="streaks-tab" data-bs-toggle="tab"
+                        data-bs-target="#streaks" type="button" role="tab">
+                    🔁 Streaks
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -201,92 +195,99 @@
                 </div>
             </div>
 
-            <!-- Workout Heatmap -->
-            <div class="tab-pane fade" id="workout-heatmap" role="tabpanel">
+            <!-- Streaks (Combined) -->
+            <div class="tab-pane fade" id="streaks" role="tabpanel">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Workout Heatmap</h5>
-                        <p class="text-muted small mb-2">This view tracks all your activities (running, cycling, workouts, etc.), showing your consistency across all workout types. It measures consecutive days with at least one activity.</p>
-                        <div class="d-flex justify-content-end align-items-center small text-muted mb-2">
-                            <div class="legend-item"><span class="legend-swatch lvl-0"></span>No Activity</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-1"></span>< 1h</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-2"></span>1–2h</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-3"></span>2h+</div>
-                        </div>
-                        <div id="workoutTimeline" class="heatmap-grid mb-3"></div>
-                        <div class="row text-center" id="streakCounters">
-                            <div class="col-6 col-md-2 mb-2">
-                                <div class="h3 mb-0" id="workoutDays">0</div>
-                                <div class="text-muted small">Workout Days</div>
-                            </div>
-                            <div class="col-6 col-md-2 mb-2">
-                                <div class="h3 mb-0" id="missedDays">0</div>
-                                <div class="text-muted small">Missed Days</div>
-                            </div>
-                            <div class="col-6 col-md-2 mb-2">
-                                <div class="h3 mb-0" id="currentStreak">0</div>
-                                <div class="text-muted small">Current Streak</div>
-                            </div>
-                            <div class="col-6 col-md-2 mb-2">
-                                <div class="h3 mb-0" id="daysSinceLast">0</div>
-                                <div class="text-muted small">Days Since Last</div>
-                            </div>
-                            <div class="col-6 col-md-2 mb-2">
-                                <div class="h3 mb-0" id="longestGap">0</div>
-                                <div class="text-muted small">Longest Gap</div>
-                            </div>
-                            <div class="col-6 col-md-2 mb-2">
-                                <div class="h3 mb-0" id="totalGapDays">0</div>
-                                <div class="text-muted small">Total Gap Days</div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h5 class="card-title mb-0">Streaks</h5>
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Streak toggle">
+                                <input type="radio" class="btn-check" name="streakMode" id="streakModeWorkout" autocomplete="off" checked>
+                                <label class="btn btn-outline-secondary" for="streakModeWorkout">All Activities</label>
+                                <input type="radio" class="btn-check" name="streakMode" id="streakModeRunning" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="streakModeRunning">Running</label>
                             </div>
                         </div>
-                        <p class="mt-2" id="consistencyMsg"></p>
-                        <div class="mt-3" id="showGapDetailsContainer" style="display: none;">
-                            <button class="btn btn-sm btn-outline-primary" onclick="toggleGapDetails()">
-                                <span id="gapDetailsToggleText">Show Gap Details</span>
-                            </button>
-                        </div>
-                        <div class="mt-3" id="gapDetailsSection" style="display: none;">
-                            <div class="alert alert-warning">
-                                <h6 class="alert-heading">Missed Days:</h6>
-                                <div id="gapDetailsList"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Running Heatmap -->
-            <div class="tab-pane fade" id="running-heatmap" role="tabpanel">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Running Heatmap</h5>
-                        <p class="text-muted small mb-2">This view tracks your running activities, showing daily mileage with color-coded intensity.</p>
-                        <div class="d-flex justify-content-end align-items-center small text-muted mb-2">
-                            <div class="legend-item"><span class="legend-swatch lvl-0"></span>Non-Running</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-1"></span>Easy</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-2"></span>Moderate</div>
-                            <div class="legend-item"><span class="legend-swatch lvl-3"></span>Big Day</div>
-                        </div>
-                        <div id="runningHeatmap" class="heatmap-grid mb-3"></div>
-                        <div class="row text-center" id="runningStats">
-                            <div class="col-6 col-md-3 mb-2">
-                                <div class="h3 mb-0" id="runningDays">0</div>
-                                <div class="text-muted small">Running Days</div>
+                        <!-- Workout Heatmap Section -->
+                        <section id="streaks-workout-section">
+                            <p class="text-muted small mb-2">Tracks all your activities (running, cycling, workouts, etc.) and measures consecutive days with at least one activity.</p>
+                            <div class="d-flex justify-content-end align-items-center small text-muted mb-2">
+                                <div class="legend-item"><span class="legend-swatch lvl-0"></span>No Activity</div>
+                                <div class="legend-item"><span class="legend-swatch lvl-1"></span>< 1h</div>
+                                <div class="legend-item"><span class="legend-swatch lvl-2"></span>1–2h</div>
+                                <div class="legend-item"><span class="legend-swatch lvl-3"></span>2h+</div>
                             </div>
-                            <div class="col-6 col-md-3 mb-2">
-                                <div class="h3 mb-0" id="nonRunningDays">0</div>
-                                <div class="text-muted small">Non-Running Days</div>
+                            <div id="workoutTimeline" class="heatmap-grid mb-3"></div>
+                            <div class="row text-center" id="streakCounters">
+                                <div class="col-6 col-md-2 mb-2">
+                                    <div class="h3 mb-0" id="workoutDays">0</div>
+                                    <div class="text-muted small">Workout Days</div>
+                                </div>
+                                <div class="col-6 col-md-2 mb-2">
+                                    <div class="h3 mb-0" id="missedDays">0</div>
+                                    <div class="text-muted small">Missed Days</div>
+                                </div>
+                                <div class="col-6 col-md-2 mb-2">
+                                    <div class="h3 mb-0" id="currentStreak">0</div>
+                                    <div class="text-muted small">Current Streak</div>
+                                </div>
+                                <div class="col-6 col-md-2 mb-2">
+                                    <div class="h3 mb-0" id="daysSinceLast">0</div>
+                                    <div class="text-muted small">Days Since Last</div>
+                                </div>
+                                <div class="col-6 col-md-2 mb-2">
+                                    <div class="h3 mb-0" id="longestGap">0</div>
+                                    <div class="text-muted small">Longest Gap</div>
+                                </div>
+                                <div class="col-6 col-md-2 mb-2">
+                                    <div class="h3 mb-0" id="totalGapDays">0</div>
+                                    <div class="text-muted small">Total Gap Days</div>
+                                </div>
                             </div>
-                            <div class="col-6 col-md-3 mb-2">
-                                <div class="h3 mb-0" id="currentRunStreak">0</div>
-                                <div class="text-muted small">Current Streak</div>
+                            <p class="mt-2" id="consistencyMsg"></p>
+                            <div class="mt-3" id="showGapDetailsContainer" style="display: none;">
+                                <button class="btn btn-sm btn-outline-primary" onclick="toggleGapDetails()">
+                                    <span id="gapDetailsToggleText">Show Gap Details</span>
+                                </button>
                             </div>
-                            <div class="col-6 col-md-3 mb-2">
-                                <div class="h3 mb-0" id="longestRunGap">0</div>
-                                <div class="text-muted small">Longest Gap</div>
+                            <div class="mt-3" id="gapDetailsSection" style="display: none;">
+                                <div class="alert alert-warning">
+                                    <h6 class="alert-heading">Missed Days:</h6>
+                                    <div id="gapDetailsList"></div>
+                                </div>
                             </div>
-                        </div>
+                        </section>
+
+                        <!-- Running Heatmap Section -->
+                        <section id="streaks-running-section" style="display:none;">
+                            <p class="text-muted small mb-2">Tracks your running activities, showing daily mileage with color-coded intensity.</p>
+                            <div class="d-flex justify-content-end align-items-center small text-muted mb-2">
+                                <div class="legend-item"><span class="legend-swatch lvl-0"></span>Non-Running</div>
+                                <div class="legend-item"><span class="legend-swatch lvl-1"></span>Easy</div>
+                                <div class="legend-item"><span class="legend-swatch lvl-2"></span>Moderate</div>
+                                <div class="legend-item"><span class="legend-swatch lvl-3"></span>Big Day</div>
+                            </div>
+                            <div id="runningHeatmap" class="heatmap-grid mb-3"></div>
+                            <div class="row text-center" id="runningStats">
+                                <div class="col-6 col-md-3 mb-2">
+                                    <div class="h3 mb-0" id="runningDays">0</div>
+                                    <div class="text-muted small">Running Days</div>
+                                </div>
+                                <div class="col-6 col-md-3 mb-2">
+                                    <div class="h3 mb-0" id="nonRunningDays">0</div>
+                                    <div class="text-muted small">Non-Running Days</div>
+                                </div>
+                                <div class="col-6 col-md-3 mb-2">
+                                    <div class="h3 mb-0" id="currentRunStreak">0</div>
+                                    <div class="text-muted small">Current Streak</div>
+                                </div>
+                                <div class="col-6 col-md-3 mb-2">
+                                    <div class="h3 mb-0" id="longestRunGap">0</div>
+                                    <div class="text-muted small">Longest Gap</div>
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>
@@ -1000,6 +1001,45 @@
             loadMileageTrend('daily');
             loadPaceTrend('daily');
         }
+
+        // Streaks tab toggle handlers
+        (function initStreaksToggle(){
+            function showWorkout(){
+                const w = document.getElementById('streaks-workout-section');
+                const r = document.getElementById('streaks-running-section');
+                if (!w || !r) return;
+                w.style.display = '';
+                r.style.display = 'none';
+                // Ensure data is fresh for current date filter
+                loadWorkoutHeatmap();
+            }
+            function showRunning(){
+                const w = document.getElementById('streaks-workout-section');
+                const r = document.getElementById('streaks-running-section');
+                if (!w || !r) return;
+                w.style.display = 'none';
+                r.style.display = '';
+                loadRunningHeatmap();
+            }
+
+            // Wire radio buttons
+            const workoutBtn = document.getElementById('streakModeWorkout');
+            const runningBtn = document.getElementById('streakModeRunning');
+            if (workoutBtn) workoutBtn.addEventListener('change', e => { if (e.target.checked) showWorkout(); });
+            if (runningBtn) runningBtn.addEventListener('change', e => { if (e.target.checked) showRunning(); });
+
+            // When the Streaks tab becomes active, refresh the visible section
+            const streaksTabBtn = document.getElementById('streaks-tab');
+            if (streaksTabBtn) {
+                streaksTabBtn.addEventListener('shown.bs.tab', () => {
+                    if (runningBtn && runningBtn.checked) {
+                        showRunning();
+                    } else {
+                        showWorkout();
+                    }
+                });
+            }
+        })();
 
         function generateColors(count) {
             const colors = [

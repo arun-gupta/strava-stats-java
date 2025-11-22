@@ -57,8 +57,9 @@ All authenticated users see only their own data.
 4.3 Dashboard Widgets (all recomputed under active date filter)
 - Activity Count Distribution: counts per activity type with percentage labels. Output suitable for a pie/donut chart.
 - Time Distribution: total moving time aggregated by activity type (format HH:MM). Output suitable for a pie/donut chart.
-- Workout Heatmap: calendar-like grid covering all activities; intensity coloration (e.g., by number of activities or time). Include streak metrics (current and longest streak of any-activity days).
-- Running Heatmap: calendar-like daily grid showing running mileage intensity with running streak metrics.
+- Streaks (toggleable): a single tab that contains a calendar-like heatmap and counters with a toggle to switch between:
+    - All Activities (formerly Workout Heatmap): intensity by workout time; includes streak metrics (current and longest streak of any-activity days) and gap details.
+    - Running (formerly Running Heatmap): daily running mileage intensity with running-specific streak metrics.
 - Running Stats:
     - Totals: total runs, runs >= 10K, total distance (mi/km), average pace (MM:SS per mile/km).
     - Distribution: histogram of run distances from 0–10 miles in 1-mile bins (or 0–16 km in 1-km bins) with ability to extend range if data exceeds.
