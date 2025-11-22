@@ -1,6 +1,10 @@
 package com.example.strava.service;
 
 import com.example.strava.model.StravaActivity;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -12,10 +16,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
 public class StravaApiService {
+
+    private static final Logger logger = LoggerFactory.getLogger(StravaApiService.class);
 
     private final WebClient webClient;
     private final OAuth2AuthorizedClientService authorizedClientService;
@@ -27,7 +34,11 @@ public class StravaApiService {
         this.authorizedClientService = authorizedClientService;
     }
 
+    @Retry(name = "stravaApi", fallbackMethod = "getActivitiesFallback")
+    @CircuitBreaker(name = "stravaApi", fallbackMethod = "getActivitiesFallback")
     public List<StravaActivity> getActivities(String principalName, LocalDate after, LocalDate before, int perPage) {
+        logger.debug("Fetching activities for user: {}", principalName);
+
         OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient("strava", principalName);
 
         if (client == null) {
@@ -40,7 +51,7 @@ public class StravaApiService {
         long afterEpoch = after != null ? after.atStartOfDay(timezone).toEpochSecond() : 0;
         // Strava's 'before' parameter is exclusive, so use end of day in user's timezone + 1 second
         // This ensures all activities on the 'before' date are included, regardless of timezone
-        long beforeEpoch = before != null 
+        long beforeEpoch = before != null
             ? before.atTime(LocalTime.MAX).atZone(timezone).toEpochSecond() + 1
             : System.currentTimeMillis() / 1000;
 
@@ -56,6 +67,11 @@ public class StravaApiService {
                 .bodyToFlux(StravaActivity.class)
                 .collectList()
                 .block();
+    }
+
+    private List<StravaActivity> getActivitiesFallback(String principalName, LocalDate after, LocalDate before, int perPage, Exception ex) {
+        logger.error("Fallback triggered for getActivities due to: {}", ex.getMessage());
+        return Collections.emptyList();
     }
 
     public List<StravaActivity> getAllActivities(String principalName, LocalDate after, LocalDate before) {
