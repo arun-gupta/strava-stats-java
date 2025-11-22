@@ -32,7 +32,7 @@ All authenticated users see only their own data.
 - User opens the site → clicks "Connect with Strava" → OAuth flow → consent → redirect back to app.
 
 2) View dashboard
-- After authentication, user lands on a dashboard showing: activity count distribution, time distribution, workout heatmap, running heatmap, running stats, mileage trend, and pace trend.
+- After authentication, user lands on a dashboard showing: overview (activity count distribution), time distribution, workout heatmap, running heatmap, running stats, mileage trend, and pace trend.
 
 3) Filter by date range
 - User applies a predefined or custom date range; all widgets recompute based on the active window.
@@ -55,7 +55,7 @@ All authenticated users see only their own data.
 - Timezone handling: normalize activity timestamps to user timezone for daily/weekly aggregations.
 
 4.3 Dashboard Widgets (all recomputed under active date filter)
-- Activity Count Distribution: counts per activity type with percentage labels. Output suitable for a pie/donut chart.
+- Overview (Activity Count Distribution): counts per activity type with percentage labels. Output suitable for a pie/donut chart.
 - Time Distribution: total moving time aggregated by activity type (format HH:MM). Output suitable for a pie/donut chart.
 - Streaks (toggleable): a single tab that contains a calendar-like heatmap and counters with a toggle to switch between:
     - All Activities (formerly Workout Heatmap): intensity by workout time; includes streak metrics (current and longest streak of any-activity days) and gap details.
@@ -144,7 +144,7 @@ Unit conversion helpers must convert meters↔miles/kilometers, seconds↔HH:MM:
 
 ## 8. Computation Rules
 
-- Activity Count Distribution: group by type over filtered range.
+- Overview (Activity Count Distribution): group by type over filtered range.
 - Time Distribution: sum movingTime by type over filtered range.
 - Workout Heatmap: for each date, intensity = count of activities (or total movingTime). Define color scale thresholds (e.g., quantiles or fixed buckets).
 - Running Heatmap: same grid but intensity = runDistance for that date.
@@ -268,7 +268,7 @@ All authenticated users see only their own data.
 - User opens the site → clicks "Connect with Strava" → OAuth flow → consent → redirect back to app.
 
 2) View dashboard
-- After authentication, user lands on a dashboard showing: activity count distribution, time distribution, workout heatmap, running heatmap, running stats, mileage trend, and pace trend.
+- After authentication, user lands on a dashboard showing: overview (activity count distribution), time distribution, workout heatmap, running heatmap, running stats, mileage trend, and pace trend.
 
 3) Filter by date range
 - User applies a predefined or custom date range; all widgets recompute based on the active window.
@@ -291,7 +291,7 @@ All authenticated users see only their own data.
 - Timezone handling: normalize activity timestamps to user timezone for daily/weekly aggregations.
 
 4.3 Dashboard Widgets (all recomputed under active date filter)
-- Activity Count Distribution: counts per activity type with percentage labels. Output suitable for a pie/donut chart.
+- Overview (Activity Count Distribution): counts per activity type with percentage labels. Output suitable for a pie/donut chart.
 - Time Distribution: total moving time aggregated by activity type (format HH:MM). Output suitable for a pie/donut chart.
 - Workout Heatmap: calendar-like grid covering all activities; intensity coloration (e.g., by number of activities or time). Include streak metrics (current and longest streak of any-activity days).
 - Running Heatmap: calendar-like daily grid showing running mileage intensity with running streak metrics.
@@ -379,7 +379,7 @@ Unit conversion helpers must convert meters↔miles/kilometers, seconds↔HH:MM:
 
 ## 8. Computation Rules
 
-- Activity Count Distribution: group by type over filtered range.
+- Overview (Activity Count Distribution): group by type over filtered range.
 - Time Distribution: sum movingTime by type over filtered range.
 - Workout Heatmap: for each date, intensity = count of activities (or total movingTime). Define color scale thresholds (e.g., quantiles or fixed buckets).
 - Running Heatmap: same grid but intensity = runDistance for that date.

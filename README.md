@@ -27,7 +27,7 @@ A Spring Boot application for analyzing Strava activities with comprehensive sta
 ## Features
 
 - **Secure Strava OAuth Authentication** - Login with your Strava account
-- **Activity Count** - Pie chart showing activity types with counts and percentages
+- **Overview** - Pie chart showing activity types with counts and percentages
 - **Duration** - Visualize time spent per activity type in HH:MM format
 - **Heatmap** - Toggle between:
   - **All Activities**: grid heatmap of any-activity days with streak counters and gap details
