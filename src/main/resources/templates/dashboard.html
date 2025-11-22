@@ -93,7 +93,6 @@
                                     <button type="button" id="btnLast30" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(30, 'btnLast30')">Last 30 Days</button>
                                     <button type="button" id="btnLast90" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(90, 'btnLast90')">Last 90 Days</button>
                                     <button type="button" id="btnLast180" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(180, 'btnLast180')">Last 6 Months</button>
-                                    <button type="button" id="btnLast365" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(365, 'btnLast365')">Last Year</button>
                                     <button type="button" id="btnYTD" class="btn btn-outline-secondary btn-sm" onclick="setDateRangeYTD('btnYTD')">YTD</button>
                                     <button type="button" id="btnAllTime" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(0, 'btnAllTime')">All Time</button>
                                     <button type="button" id="btnCustom" class="btn btn-outline-secondary btn-sm" onclick="showCustomRange('btnCustom')">Custom</button>
@@ -328,15 +327,7 @@
             <div class="tab-pane fade" id="trends" role="tabpanel">
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-                            <h5 class="card-title mb-2 mb-sm-0">Mileage & Pace Trends</h5>
-                            <div class="btn-group btn-group-sm" role="group" aria-label="Trend mode toggle">
-                                <input type="radio" class="btn-check" name="trendMode" id="trendModeActivity" autocomplete="off">
-                                <label class="btn btn-outline-secondary" for="trendModeActivity">Activity</label>
-                                <input type="radio" class="btn-check" name="trendMode" id="trendModeRunning" autocomplete="off" checked>
-                                <label class="btn btn-outline-secondary" for="trendModeRunning">Running</label>
-                            </div>
-                        </div>
+                        <h5 class="card-title mb-3">Running Trends</h5>
 
                         <div class="btn-group mb-3" role="group">
                             <button type="button" class="btn btn-outline-primary" id="trendDailyBtn">Daily</button>
@@ -349,7 +340,7 @@
                             <h6 class="text-muted">Mileage</h6>
                             <canvas id="mileageTrendChart"></canvas>
                         </div>
-                        <div id="paceTrendSection">
+                        <div>
                             <h6 class="text-muted">Pace</h6>
                             <canvas id="paceTrendChart"></canvas>
                         </div>
@@ -363,7 +354,6 @@
     <script>
         let activityCountChart, timeDistChart, mileageTrendChart, paceTrendChart, runDistributionChart;
         let currentTrendPeriod = 'daily';
-        let currentTrendMode = 'running'; // 'activity' | 'running'
 
         function getDateParams() {
             const after = document.getElementById('afterDate').value;
@@ -1118,13 +1108,11 @@
             return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
 
-        // Trends tab: wire period buttons and mode toggle
+        // Trends tab: wire period buttons
         (function initTrendsControls(){
             const dailyBtn = document.getElementById('trendDailyBtn');
             const weeklyBtn = document.getElementById('trendWeeklyBtn');
             const monthlyBtn = document.getElementById('trendMonthlyBtn');
-            const modeActivity = document.getElementById('trendModeActivity');
-            const modeRunning = document.getElementById('trendModeRunning');
 
             function setActive(btn){
                 [dailyBtn, weeklyBtn, monthlyBtn].forEach(b => b && b.classList.remove('active'));
@@ -1134,22 +1122,6 @@
             if (dailyBtn) dailyBtn.addEventListener('click', () => { currentTrendPeriod = 'daily'; setActive(dailyBtn); loadMileageTrend('daily'); loadPaceTrend('daily'); });
             if (weeklyBtn) weeklyBtn.addEventListener('click', () => { currentTrendPeriod = 'weekly'; setActive(weeklyBtn); loadMileageTrend('weekly'); loadPaceTrend('weekly'); });
             if (monthlyBtn) monthlyBtn.addEventListener('click', () => { currentTrendPeriod = 'monthly'; setActive(monthlyBtn); loadMileageTrend('monthly'); loadPaceTrend('monthly'); });
-
-            if (modeActivity) modeActivity.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    currentTrendMode = 'activity';
-                    document.getElementById('paceTrendSection').style.display = 'none';
-                    loadMileageTrend(currentTrendPeriod);
-                }
-            });
-            if (modeRunning) modeRunning.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    currentTrendMode = 'running';
-                    document.getElementById('paceTrendSection').style.display = 'block';
-                    loadMileageTrend(currentTrendPeriod);
-                    loadPaceTrend(currentTrendPeriod);
-                }
-            });
 
             // When the Trends tab is shown, refresh charts
             const trendsTabBtn = document.getElementById('trends-tab');
