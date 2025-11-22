@@ -4,7 +4,7 @@ A Spring Boot application for analyzing Strava activities with comprehensive sta
 
 ## Features
 
-- **Secure Strava OAuth Authentication** - Login with your Strava account
+### Analytics & Visualizations
 - **Overview** - Pie chart showing activity types with counts and percentages
 - **Duration** - Visualize time spent per activity type in HH:MM format
 - **Heatmap** - Toggle between:
@@ -19,6 +19,12 @@ A Spring Boot application for analyzing Strava activities with comprehensive sta
   - Run distance distribution histogram (0-10 miles in 1-mile ranges)
   - Personal records (fastest mile, fastest 10K, longest run, most elevation)
 - **Date Range Filtering** - Quick pick buttons (7 days, 30 days, 90 days, 6 months, 1 year, YTD, All Time) and custom date range selection
+
+### Security & Reliability
+- **Secure OAuth Authentication** - Spring Security OAuth2 integration with Strava
+- **Comprehensive Error Handling** - User-friendly error messages with automatic retry for transient failures
+- **Resilience Patterns** - Circuit breaker and exponential backoff retry for API reliability
+- **Input Validation** - Server-side validation for all user inputs
 
 ## Quickstart
 
