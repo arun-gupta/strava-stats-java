@@ -156,15 +156,9 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="mileage-trend-tab" data-bs-toggle="tab"
-                        data-bs-target="#mileage-trend" type="button" role="tab">
-                    📈 Mileage Trend
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pace-trend-tab" data-bs-toggle="tab"
-                        data-bs-target="#pace-trend" type="button" role="tab">
-                    ⚡ Pace Trend
+                <button class="nav-link" id="trends-tab" data-bs-toggle="tab"
+                        data-bs-target="#trends" type="button" role="tab">
+                    📈 Trends
                 </button>
             </li>
         </ul>
@@ -314,32 +308,35 @@
                 </div>
             </div>
 
-            <!-- Mileage Trend -->
-            <div class="tab-pane fade" id="mileage-trend" role="tabpanel">
+            <!-- Combined Trends -->
+            <div class="tab-pane fade" id="trends" role="tabpanel">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Mileage Trend</h5>
-                        <div class="btn-group mb-3" role="group">
-                            <button type="button" class="btn btn-outline-primary" onclick="loadMileageTrend('daily')">Daily</button>
-                            <button type="button" class="btn btn-outline-primary" onclick="loadMileageTrend('weekly')">Weekly</button>
-                            <button type="button" class="btn btn-outline-primary" onclick="loadMileageTrend('monthly')">Monthly</button>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-2 mb-sm-0">Mileage & Pace Trends</h5>
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Trend mode toggle">
+                                <input type="radio" class="btn-check" name="trendMode" id="trendModeActivity" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="trendModeActivity">Activity</label>
+                                <input type="radio" class="btn-check" name="trendMode" id="trendModeRunning" autocomplete="off" checked>
+                                <label class="btn btn-outline-secondary" for="trendModeRunning">Running</label>
+                            </div>
                         </div>
-                        <canvas id="mileageTrendChart"></canvas>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Pace Trend -->
-            <div class="tab-pane fade" id="pace-trend" role="tabpanel">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Pace Trend</h5>
                         <div class="btn-group mb-3" role="group">
-                            <button type="button" class="btn btn-outline-primary" onclick="loadPaceTrend('daily')">Daily</button>
-                            <button type="button" class="btn btn-outline-primary" onclick="loadPaceTrend('weekly')">Weekly</button>
-                            <button type="button" class="btn btn-outline-primary" onclick="loadPaceTrend('monthly')">Monthly</button>
+                            <button type="button" class="btn btn-outline-primary" id="trendDailyBtn">Daily</button>
+                            <button type="button" class="btn btn-outline-primary" id="trendWeeklyBtn">Weekly</button>
+                            <button type="button" class="btn btn-outline-primary" id="trendMonthlyBtn">Monthly</button>
                         </div>
-                        <canvas id="paceTrendChart"></canvas>
+
+                        <!-- Stacked charts: Mileage on top, Pace below -->
+                        <div class="mb-4">
+                            <h6 class="text-muted">Mileage</h6>
+                            <canvas id="mileageTrendChart"></canvas>
+                        </div>
+                        <div>
+                            <h6 class="text-muted">Pace</h6>
+                            <canvas id="paceTrendChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -349,6 +346,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let activityCountChart, timeDistChart, mileageTrendChart, paceTrendChart, runDistributionChart;
+        let currentTrendPeriod = 'daily';
+        let currentTrendMode = 'running'; // 'activity' | 'running'
 
         function getDateParams() {
             const after = document.getElementById('afterDate').value;
@@ -814,6 +813,8 @@
         }
 
         function loadMileageTrend(period) {
+            // Currently backend mileage-trend is across activities; for 'running' mode we keep same API
+            // In the future, backend can support a mode param; for now just pass period and date range
             fetch('/api/stats/mileage-trend' + getDateParams() + (getDateParams() ? '&' : '?') + 'period=' + period)
                 .then(response => response.json())
                 .then(data => {
@@ -868,6 +869,7 @@
         }
 
         function loadPaceTrend(period) {
+            // Pace trend is inherently running-focused; we reuse same endpoint for both modes
             fetch('/api/stats/pace-trend' + getDateParams() + (getDateParams() ? '&' : '?') + 'period=' + period)
                 .then(response => response.json())
                 .then(data => {
@@ -998,8 +1000,9 @@
             loadWorkoutHeatmap();
             loadRunStatistics(); // This also loads run distribution
             loadRunningHeatmap();
-            loadMileageTrend('daily');
-            loadPaceTrend('daily');
+            // Initialize trends with current selections
+            loadMileageTrend(currentTrendPeriod);
+            loadPaceTrend(currentTrendPeriod);
         }
 
         // Streaks tab toggle handlers
@@ -1063,6 +1066,39 @@
             const m = totalMinutes % 60;
             return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
+
+        // Trends tab: wire period buttons and mode toggle
+        (function initTrendsControls(){
+            const dailyBtn = document.getElementById('trendDailyBtn');
+            const weeklyBtn = document.getElementById('trendWeeklyBtn');
+            const monthlyBtn = document.getElementById('trendMonthlyBtn');
+            const modeActivity = document.getElementById('trendModeActivity');
+            const modeRunning = document.getElementById('trendModeRunning');
+
+            function setActive(btn){
+                [dailyBtn, weeklyBtn, monthlyBtn].forEach(b => b && b.classList.remove('active'));
+                btn && btn.classList.add('active');
+            }
+
+            if (dailyBtn) dailyBtn.addEventListener('click', () => { currentTrendPeriod = 'daily'; setActive(dailyBtn); loadMileageTrend('daily'); loadPaceTrend('daily'); });
+            if (weeklyBtn) weeklyBtn.addEventListener('click', () => { currentTrendPeriod = 'weekly'; setActive(weeklyBtn); loadMileageTrend('weekly'); loadPaceTrend('weekly'); });
+            if (monthlyBtn) monthlyBtn.addEventListener('click', () => { currentTrendPeriod = 'monthly'; setActive(monthlyBtn); loadMileageTrend('monthly'); loadPaceTrend('monthly'); });
+
+            if (modeActivity) modeActivity.addEventListener('change', (e) => { if (e.target.checked) { currentTrendMode = 'activity'; loadMileageTrend(currentTrendPeriod); loadPaceTrend(currentTrendPeriod); } });
+            if (modeRunning) modeRunning.addEventListener('change', (e) => { if (e.target.checked) { currentTrendMode = 'running'; loadMileageTrend(currentTrendPeriod); loadPaceTrend(currentTrendPeriod); } });
+
+            // When the Trends tab is shown, refresh charts
+            const trendsTabBtn = document.getElementById('trends-tab');
+            if (trendsTabBtn) {
+                trendsTabBtn.addEventListener('shown.bs.tab', () => {
+                    loadMileageTrend(currentTrendPeriod);
+                    loadPaceTrend(currentTrendPeriod);
+                });
+            }
+
+            // Default UI state
+            setActive(dailyBtn);
+        })();
 
         // Load data on page load with default 30 days
         window.addEventListener('load', function() {
