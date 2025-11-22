@@ -24,12 +24,19 @@ public class StravaStatsController {
         this.stravaStatsService = stravaStatsService;
     }
 
+    private void validateDateRange(LocalDate after, LocalDate before) {
+        if (after != null && before != null && after.isAfter(before)) {
+            throw new IllegalArgumentException("Start date must be before or equal to end date");
+        }
+    }
+
     @GetMapping("/summary")
     public SummaryStatsDto getSummary(
             @AuthenticationPrincipal OAuth2User principal,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getSummaryStats(activities);
     }
@@ -40,6 +47,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getActivityCountDistribution(activities);
     }
@@ -50,6 +58,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getTimeDistribution(activities);
     }
@@ -60,6 +69,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getWorkoutHeatmapData(activities);
     }
@@ -70,6 +80,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         LocalDate reference = (before != null) ? before : LocalDate.now();
         return stravaStatsService.getWorkoutHeatmapSummary(activities, reference, after);
@@ -81,6 +92,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getRunStatistics(activities);
     }
@@ -91,6 +103,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getRunDistribution(activities);
     }
@@ -101,6 +114,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getRunningHeatmap(activities);
     }
@@ -112,6 +126,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getMileageTrend(activities, period);
     }
@@ -123,6 +138,7 @@ public class StravaStatsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
 
+        validateDateRange(after, before);
         List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
         return stravaStatsService.getPaceTrend(activities, period);
     }
