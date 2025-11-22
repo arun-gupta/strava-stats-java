@@ -99,21 +99,25 @@
                                     <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(365)">Last Year</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRangeYTD()">YTD</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(0)">All Time</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showCustomRange()">Custom</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" id="customDateRow" style="display:none;">
                             <div class="col-md-3">
                                 <label for="afterDate" class="form-label">Start Date</label>
-                                <input type="date" class="form-control" id="afterDate">
+                                <input type="date" class="form-control" id="afterDate" oninput="validateCustomRange()">
                             </div>
                             <div class="col-md-3">
                                 <label for="beforeDate" class="form-label">End Date</label>
-                                <input type="date" class="form-control" id="beforeDate">
+                                <input type="date" class="form-control" id="beforeDate" oninput="validateCustomRange()">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">&nbsp;</label>
-                                <button class="btn btn-primary d-block" onclick="loadAllData()">Apply Filter</button>
+                                <button class="btn btn-primary d-block" id="applyCustomBtn" onclick="loadAllData()">Apply Filter</button>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <div class="text-danger small" id="customRangeError" role="alert" style="display:none;">Start date cannot be after end date.</div>
                             </div>
                         </div>
                         <div class="row mt-3">
@@ -948,6 +952,9 @@
                 document.getElementById('beforeDate').value = endDate;
             }
 
+            // Hide custom date row when a preset is chosen
+            hideCustomRange();
+
             // Apply the filter
             loadAllData();
         }
@@ -961,6 +968,7 @@
             document.getElementById('afterDate').value = startDate;
             document.getElementById('beforeDate').value = endDate;
             // Apply the filter
+            hideCustomRange();
             loadAllData();
         }
 
@@ -1100,9 +1108,47 @@
             setActive(dailyBtn);
         })();
 
-        // Load data on page load with default 30 days
+        // Custom range helpers
+        function showCustomRange() {
+            const row = document.getElementById('customDateRow');
+            if (row) row.style.display = '';
+            const startInput = document.getElementById('afterDate');
+            if (startInput) startInput.focus();
+            // Validate initial state
+            validateCustomRange();
+        }
+
+        function hideCustomRange() {
+            const row = document.getElementById('customDateRow');
+            if (row) row.style.display = 'none';
+            const err = document.getElementById('customRangeError');
+            if (err) err.style.display = 'none';
+            const applyBtn = document.getElementById('applyCustomBtn');
+            if (applyBtn) applyBtn.disabled = false;
+        }
+
+        function validateCustomRange() {
+            const start = document.getElementById('afterDate').value;
+            const end = document.getElementById('beforeDate').value;
+            const err = document.getElementById('customRangeError');
+            const applyBtn = document.getElementById('applyCustomBtn');
+            if (start && end) {
+                const s = new Date(start);
+                const e = new Date(end);
+                if (s > e) {
+                    if (err) err.style.display = '';
+                    if (applyBtn) applyBtn.disabled = true;
+                    return false;
+                }
+            }
+            if (err) err.style.display = 'none';
+            if (applyBtn) applyBtn.disabled = false;
+            return true;
+        }
+
+        // Load data on page load with default 7 days
         window.addEventListener('load', function() {
-            setDateRange(30); // Default to last 30 days
+            setDateRange(7); // Default to last 7 days
         });
     </script>
 </body>
