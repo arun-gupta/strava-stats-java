@@ -79,6 +79,13 @@
         </div>
     </nav>
 
+    <!-- Loading Spinner -->
+    <div id="globalLoadingSpinner" class="position-fixed top-50 start-50 translate-middle" style="z-index: 9999; display: none;">
+        <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
     <!-- Error Toast Container -->
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
         <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -378,19 +385,95 @@
     <script>
         let activityCountChart, timeDistChart, mileageTrendChart, paceTrendChart, runDistributionChart;
         let currentTrendPeriod = 'daily';
+        let activeRequests = 0;
 
-        // Error handling helper
-        function showErrorToast(message) {
+        // Loading spinner management
+        function showLoadingSpinner() {
+            activeRequests++;
+            document.getElementById('globalLoadingSpinner').style.display = 'block';
+        }
+
+        function hideLoadingSpinner() {
+            activeRequests--;
+            if (activeRequests <= 0) {
+                activeRequests = 0;
+                document.getElementById('globalLoadingSpinner').style.display = 'none';
+            }
+        }
+
+        // Error handling helpers
+        function showErrorToast(message, showRetry = false, retryCallback = null) {
             const toastElement = document.getElementById('errorToast');
             const messageElement = document.getElementById('errorToastMessage');
-            messageElement.textContent = message;
-            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+
+            if (showRetry && retryCallback) {
+                messageElement.innerHTML = `${message} <button class="btn btn-sm btn-light ms-2" onclick="(${retryCallback.toString()})()">Retry</button>`;
+            } else {
+                messageElement.textContent = message;
+            }
+
+            const toast = new bootstrap.Toast(toastElement, { delay: 7000 });
             toast.show();
         }
 
-        function handleFetchError(error, context) {
+        function handleFetchError(error, context, retryCallback = null) {
             console.error(`Error loading ${context}:`, error);
-            showErrorToast(`Unable to load ${context}. Please try again.`);
+
+            // Check if error message contains HTTP status
+            const statusMatch = error.message.match(/HTTP (\d+)/);
+            let message = `Unable to load ${context}.`;
+            let showRetry = true;
+
+            if (statusMatch) {
+                const status = parseInt(statusMatch[1]);
+                switch(status) {
+                    case 401:
+                        message = 'Authentication failed. Please reconnect with Strava.';
+                        showRetry = false;
+                        // Redirect to login after 3 seconds
+                        setTimeout(() => window.location.href = '/logout', 3000);
+                        break;
+                    case 403:
+                        message = 'Access denied. Please check your Strava permissions.';
+                        showRetry = false;
+                        break;
+                    case 429:
+                        message = 'Rate limit exceeded. Please try again in a few minutes.';
+                        showRetry = false;
+                        break;
+                    case 500:
+                    case 502:
+                    case 503:
+                    case 504:
+                        message = 'Server error. Please try again in a moment.';
+                        showRetry = true;
+                        break;
+                    default:
+                        message = `Unable to load ${context}. Please try again.`;
+                        showRetry = true;
+                }
+            }
+
+            showErrorToast(message, showRetry, retryCallback);
+        }
+
+        // Enhanced fetch wrapper with automatic spinner management
+        function fetchWithSpinner(url, context, retryCallback = null) {
+            showLoadingSpinner();
+            return fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    handleFetchError(error, context, retryCallback);
+                    throw error;
+                })
+                .finally(() => {
+                    hideLoadingSpinner();
+                });
         }
 
         function getDateParams() {
@@ -406,11 +489,7 @@
         Chart.register(ChartDataLabels);
 
         function loadActivityCount() {
-            fetch('/api/stats/activity-count' + getDateParams())
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
+            fetchWithSpinner('/api/stats/activity-count' + getDateParams(), 'activity count', loadActivityCount)
                 .then(data => {
                     const ctx = document.getElementById('activityCountChart').getContext('2d');
                     if (activityCountChart) activityCountChart.destroy();
@@ -455,15 +534,11 @@
                         }
                     });
                 })
-                .catch(error => handleFetchError(error, 'activity count'));
+                .catch(() => {}); // Error already handled in fetchWithSpinner
         }
 
         function loadTimeDistribution() {
-            fetch('/api/stats/time-distribution' + getDateParams())
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
+            fetchWithSpinner('/api/stats/time-distribution' + getDateParams(), 'time distribution', loadTimeDistribution)
                 .then(data => {
                     const ctx = document.getElementById('timeDistChart').getContext('2d');
                     if (timeDistChart) timeDistChart.destroy();
@@ -537,11 +612,12 @@
                         }
                     });
                 })
-                .catch(error => handleFetchError(error, 'time distribution'));
+                .catch(() => {}); // Error already handled in fetchWithSpinner
         }
 
         function loadWorkoutHeatmap() {
             const params = getDateParams();
+            showLoadingSpinner();
             const heatReq = fetch('/api/stats/workout-heatmap' + params)
                 .then(r => {
                     if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -671,7 +747,8 @@
                 // Store missed days globally for the toggle function
                 window.workoutMissedDays = missedDays;
             })
-            .catch(error => handleFetchError(error, 'workout heatmap'));
+            .catch(error => handleFetchError(error, 'workout heatmap', loadWorkoutHeatmap))
+            .finally(() => hideLoadingSpinner());
         }
 
         function toggleGapDetails() {
@@ -727,11 +804,7 @@
         }
 
         function loadRunStatistics() {
-            fetch('/api/stats/run-statistics' + getDateParams())
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
+            fetchWithSpinner('/api/stats/run-statistics' + getDateParams(), 'running statistics', loadRunStatistics)
                 .then(data => {
                     const container = document.getElementById('runStatsContent');
                     container.innerHTML = `
@@ -747,15 +820,11 @@
                     // Also load the run distribution chart
                     loadRunDistribution();
                 })
-                .catch(error => handleFetchError(error, 'running statistics'));
+                .catch(() => {}); // Error already handled in fetchWithSpinner
         }
 
         function loadRunDistribution() {
-            fetch('/api/stats/run-distribution' + getDateParams())
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
+            fetchWithSpinner('/api/stats/run-distribution' + getDateParams(), 'run distribution', loadRunDistribution)
                 .then(data => {
                     const ctx = document.getElementById('runDistributionChart').getContext('2d');
                     if (runDistributionChart) runDistributionChart.destroy();
@@ -798,15 +867,11 @@
                         }
                     });
                 })
-                .catch(error => handleFetchError(error, 'run distribution'));
+                .catch(() => {}); // Error already handled in fetchWithSpinner
         }
 
         function loadRunningHeatmap() {
-            fetch('/api/stats/running-heatmap' + getDateParams())
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
+            fetchWithSpinner('/api/stats/running-heatmap' + getDateParams(), 'running heatmap', loadRunningHeatmap)
                 .then(data => {
                     const container = document.getElementById('runningHeatmap');
                     container.innerHTML = '';
@@ -929,17 +994,13 @@
                     // Store missed days for the toggle function
                     window.runningMissedDays = missedRunningDays;
                 })
-                .catch(error => handleFetchError(error, 'running heatmap'));
+                .catch(() => {}); // Error already handled in fetchWithSpinner
         }
 
         function loadMileageTrend(period) {
             // Currently backend mileage-trend is across activities; for 'running' mode we keep same API
             // In the future, backend can support a mode param; for now just pass period and date range
-            fetch('/api/stats/mileage-trend' + getDateParams() + (getDateParams() ? '&' : '?') + 'period=' + period)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
+            fetchWithSpinner('/api/stats/mileage-trend' + getDateParams() + (getDateParams() ? '&' : '?') + 'period=' + period, 'mileage trend', () => loadMileageTrend(period))
                 .then(data => {
                     const ctx = document.getElementById('mileageTrendChart').getContext('2d');
                     if (mileageTrendChart) mileageTrendChart.destroy();
@@ -989,16 +1050,12 @@
                         }
                     });
                 })
-                .catch(error => handleFetchError(error, 'mileage trend'));
+                .catch(() => {}); // Error already handled in fetchWithSpinner
         }
 
         function loadPaceTrend(period) {
             // Pace trend is inherently running-focused; we reuse same endpoint for both modes
-            fetch('/api/stats/pace-trend' + getDateParams() + (getDateParams() ? '&' : '?') + 'period=' + period)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
+            fetchWithSpinner('/api/stats/pace-trend' + getDateParams() + (getDateParams() ? '&' : '?') + 'period=' + period, 'pace trend', () => loadPaceTrend(period))
                 .then(data => {
                     const ctx = document.getElementById('paceTrendChart').getContext('2d');
                     if (paceTrendChart) paceTrendChart.destroy();
@@ -1057,7 +1114,7 @@
                         }
                     });
                 })
-                .catch(error => handleFetchError(error, 'pace trend'));
+                .catch(() => {}); // Error already handled in fetchWithSpinner
         }
 
         function setActiveQuickPick(activeId) {
@@ -1140,11 +1197,7 @@
         }
 
         function loadSummaryStats() {
-            fetch('/api/stats/summary' + getDateParams())
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
+            fetchWithSpinner('/api/stats/summary' + getDateParams(), 'summary stats', loadSummaryStats)
                 .then(data => {
                     document.getElementById('displayTotalActivities').textContent = data.totalActivities;
 
@@ -1156,7 +1209,7 @@
 
                     document.getElementById('displayTotalMovingTime').textContent = timeStr;
                 })
-                .catch(error => handleFetchError(error, 'summary stats'));
+                .catch(() => {}); // Error already handled in fetchWithSpinner
         }
 
         function loadAllData() {
@@ -1331,6 +1384,19 @@
             }
             return true;
         }
+
+        // Global error boundary - catch unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showErrorToast('An unexpected error occurred. Please refresh the page.');
+            event.preventDefault();
+        });
+
+        // Global error boundary - catch JavaScript errors
+        window.addEventListener('error', function(event) {
+            console.error('Global error:', event.error);
+            showErrorToast('An unexpected error occurred. Please refresh the page.');
+        });
 
         // Load data on page load with default 7 days
         window.addEventListener('load', function() {
