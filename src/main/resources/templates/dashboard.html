@@ -117,11 +117,26 @@
                                 <div class="text-danger small" id="customRangeError" role="alert" style="display:none;">Start date cannot be after end date.</div>
                             </div>
                         </div>
-                        <div class="row mt-3">
+                        <div class="row mt-3" id="dateRangeDisplay" style="display:none;">
                             <div class="col-md-12">
-                                <div id="dateRangeDisplay" class="alert alert-info mb-0" style="display:none;">
-                                    <strong>Current Range:</strong> <span id="displayStartDate"></span> to <span id="displayEndDate"></span>
-                                    (<span id="displayTotalDays"></span> days)
+                                <div class="card">
+                                    <div class="card-body py-2">
+                                        <div class="row text-center">
+                                            <div class="col-md-4 border-end">
+                                                <small class="text-muted d-block">Date Range</small>
+                                                <strong><span id="displayStartDate"></span> to <span id="displayEndDate"></span></strong>
+                                                <small class="text-muted d-block">(<span id="displayTotalDays"></span> days)</small>
+                                            </div>
+                                            <div class="col-md-4 border-end">
+                                                <small class="text-muted d-block">Activities</small>
+                                                <strong class="fs-4 d-block"><span id="displayTotalActivities"></span></strong>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted d-block">Total Moving Time</small>
+                                                <strong class="fs-4 d-block"><span id="displayTotalMovingTime"></span></strong>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -334,7 +349,7 @@
                             <h6 class="text-muted">Mileage</h6>
                             <canvas id="mileageTrendChart"></canvas>
                         </div>
-                        <div>
+                        <div id="paceTrendSection">
                             <h6 class="text-muted">Pace</h6>
                             <canvas id="paceTrendChart"></canvas>
                         </div>
@@ -1012,8 +1027,25 @@
             }
         }
 
+        function loadSummaryStats() {
+            fetch('/api/stats/summary' + getDateParams())
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('displayTotalActivities').textContent = data.totalActivities;
+
+                    // Convert seconds to HH:MM:SS format
+                    const hours = Math.floor(data.totalMovingTimeSeconds / 3600);
+                    const minutes = Math.floor((data.totalMovingTimeSeconds % 3600) / 60);
+                    const seconds = data.totalMovingTimeSeconds % 60;
+                    const timeStr = `${hours}h ${minutes}m ${seconds}s`;
+
+                    document.getElementById('displayTotalMovingTime').textContent = timeStr;
+                });
+        }
+
         function loadAllData() {
             updateDateRangeDisplay();
+            loadSummaryStats();
             loadActivityCount();
             loadTimeDistribution();
             loadWorkoutHeatmap();
@@ -1103,8 +1135,21 @@
             if (weeklyBtn) weeklyBtn.addEventListener('click', () => { currentTrendPeriod = 'weekly'; setActive(weeklyBtn); loadMileageTrend('weekly'); loadPaceTrend('weekly'); });
             if (monthlyBtn) monthlyBtn.addEventListener('click', () => { currentTrendPeriod = 'monthly'; setActive(monthlyBtn); loadMileageTrend('monthly'); loadPaceTrend('monthly'); });
 
-            if (modeActivity) modeActivity.addEventListener('change', (e) => { if (e.target.checked) { currentTrendMode = 'activity'; loadMileageTrend(currentTrendPeriod); loadPaceTrend(currentTrendPeriod); } });
-            if (modeRunning) modeRunning.addEventListener('change', (e) => { if (e.target.checked) { currentTrendMode = 'running'; loadMileageTrend(currentTrendPeriod); loadPaceTrend(currentTrendPeriod); } });
+            if (modeActivity) modeActivity.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    currentTrendMode = 'activity';
+                    document.getElementById('paceTrendSection').style.display = 'none';
+                    loadMileageTrend(currentTrendPeriod);
+                }
+            });
+            if (modeRunning) modeRunning.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    currentTrendMode = 'running';
+                    document.getElementById('paceTrendSection').style.display = 'block';
+                    loadMileageTrend(currentTrendPeriod);
+                    loadPaceTrend(currentTrendPeriod);
+                }
+            });
 
             // When the Trends tab is shown, refresh charts
             const trendsTabBtn = document.getElementById('trends-tab');

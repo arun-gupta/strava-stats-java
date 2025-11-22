@@ -1,5 +1,6 @@
 package com.example.strava.controller;
 
+import com.example.strava.dto.SummaryStatsDto;
 import com.example.strava.model.*;
 import com.example.strava.service.StravaApiService;
 import com.example.strava.service.StravaStatsService;
@@ -21,6 +22,16 @@ public class StravaStatsController {
     public StravaStatsController(StravaApiService stravaApiService, StravaStatsService stravaStatsService) {
         this.stravaApiService = stravaApiService;
         this.stravaStatsService = stravaStatsService;
+    }
+
+    @GetMapping("/summary")
+    public SummaryStatsDto getSummary(
+            @AuthenticationPrincipal OAuth2User principal,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
+
+        List<StravaActivity> activities = stravaApiService.getAllActivities(principal.getName(), after, before);
+        return stravaStatsService.getSummaryStats(activities);
     }
 
     @GetMapping("/activity-count")

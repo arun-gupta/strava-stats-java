@@ -1,5 +1,6 @@
 package com.example.strava.service;
 
+import com.example.strava.dto.SummaryStatsDto;
 import com.example.strava.model.*;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,14 @@ public class StravaStatsService {
     private static final double METERS_TO_MILES = 0.000621371;
     private static final double METERS_TO_FEET = 3.28084;
     private static final double METERS_PER_SECOND_TO_MILES_PER_HOUR = 2.23694;
+
+    public SummaryStatsDto getSummaryStats(List<StravaActivity> activities) {
+        int totalActivities = activities.size();
+        int totalMovingTime = activities.stream()
+                .mapToInt(a -> a.getMovingTime() != null ? a.getMovingTime() : 0)
+                .sum();
+        return new SummaryStatsDto(totalActivities, totalMovingTime);
+    }
 
     public List<ActivityCountDto> getActivityCountDistribution(List<StravaActivity> activities) {
         long total = activities.size();
