@@ -91,15 +91,15 @@
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label class="form-label">Quick Pick</label>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(7)">Last 7 Days</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(30)">Last 30 Days</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(90)">Last 90 Days</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(180)">Last 6 Months</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(365)">Last Year</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRangeYTD()">YTD</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(0)">All Time</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showCustomRange()">Custom</button>
+                                <div class="btn-group" role="group" id="quickPickGroup">
+                                    <button type="button" id="btnLast7" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(7, 'btnLast7')">Last 7 Days</button>
+                                    <button type="button" id="btnLast30" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(30, 'btnLast30')">Last 30 Days</button>
+                                    <button type="button" id="btnLast90" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(90, 'btnLast90')">Last 90 Days</button>
+                                    <button type="button" id="btnLast180" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(180, 'btnLast180')">Last 6 Months</button>
+                                    <button type="button" id="btnLast365" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(365, 'btnLast365')">Last Year</button>
+                                    <button type="button" id="btnYTD" class="btn btn-outline-secondary btn-sm" onclick="setDateRangeYTD('btnYTD')">YTD</button>
+                                    <button type="button" id="btnAllTime" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(0, 'btnAllTime')">All Time</button>
+                                    <button type="button" id="btnCustom" class="btn btn-outline-secondary btn-sm" onclick="showCustomRange('btnCustom')">Custom</button>
                                 </div>
                             </div>
                         </div>
@@ -936,7 +936,17 @@
                 });
         }
 
-        function setDateRange(days) {
+        function setActiveQuickPick(activeId) {
+            const group = document.getElementById('quickPickGroup');
+            if (!group) return;
+            Array.from(group.querySelectorAll('button')).forEach(btn => btn.classList.remove('active'));
+            if (activeId) {
+                const btn = document.getElementById(activeId);
+                if (btn) btn.classList.add('active');
+            }
+        }
+
+        function setDateRange(days, btnId) {
             const today = new Date();
             const endDate = today.toISOString().split('T')[0];
 
@@ -945,21 +955,24 @@
                 document.getElementById('afterDate').value = '';
                 document.getElementById('beforeDate').value = '';
             } else {
-                // Set start date to 'days' ago
+                // Inclusive range: for N days ending today, start is (N-1) days ago
                 const startDate = new Date(today);
-                startDate.setDate(startDate.getDate() - days);
+                const offset = Math.max(0, (days - 1));
+                startDate.setDate(startDate.getDate() - offset);
                 document.getElementById('afterDate').value = startDate.toISOString().split('T')[0];
                 document.getElementById('beforeDate').value = endDate;
             }
 
             // Hide custom date row when a preset is chosen
             hideCustomRange();
+            // Reflect active preset button
+            setActiveQuickPick(btnId);
 
             // Apply the filter
             loadAllData();
         }
 
-        function setDateRangeYTD() {
+        function setDateRangeYTD(btnId) {
             const today = new Date();
             const endDate = today.toISOString().split('T')[0];
             // Set start date to January 1st of the current year (format as YYYY-MM-DD to avoid timezone issues)
@@ -969,6 +982,7 @@
             document.getElementById('beforeDate').value = endDate;
             // Apply the filter
             hideCustomRange();
+            setActiveQuickPick(btnId);
             loadAllData();
         }
 
@@ -1109,13 +1123,14 @@
         })();
 
         // Custom range helpers
-        function showCustomRange() {
+        function showCustomRange(btnId) {
             const row = document.getElementById('customDateRow');
             if (row) row.style.display = '';
             const startInput = document.getElementById('afterDate');
             if (startInput) startInput.focus();
             // Validate initial state
             validateCustomRange();
+            setActiveQuickPick(btnId || 'btnCustom');
         }
 
         function hideCustomRange() {
@@ -1143,12 +1158,43 @@
             }
             if (err) err.style.display = 'none';
             if (applyBtn) applyBtn.disabled = false;
+            // If both dates are present and valid, attempt to match a preset and highlight it; else keep Custom active
+            if (start && end) {
+                const s = new Date(start);
+                const e = new Date(end);
+                // Normalize to midnight local
+                s.setHours(0,0,0,0);
+                e.setHours(0,0,0,0);
+                const today = new Date(); today.setHours(0,0,0,0);
+                const diffDays = Math.round((e - s) / (1000*60*60*24)) + 1; // inclusive
+                const matchesTodayEnd = e.getTime() === today.getTime();
+                if (matchesTodayEnd) {
+                    // YTD: Jan 1st of this year to today
+                    const y = today.getFullYear();
+                    const jan1 = new Date(y, 0, 1); jan1.setHours(0,0,0,0);
+                    if (s.getTime() === jan1.getTime()) {
+                        setActiveQuickPick('btnYTD');
+                        return true;
+                    }
+                    const presetMap = {7:'btnLast7',30:'btnLast30',90:'btnLast90',180:'btnLast180',365:'btnLast365'};
+                    if (presetMap[diffDays]) {
+                        setActiveQuickPick(presetMap[diffDays]);
+                    } else {
+                        setActiveQuickPick('btnCustom');
+                    }
+                } else {
+                    // YTD match: start Jan 1 this year and end today
+                    setActiveQuickPick('btnCustom');
+                }
+            } else {
+                setActiveQuickPick('btnCustom');
+            }
             return true;
         }
 
         // Load data on page load with default 7 days
         window.addEventListener('load', function() {
-            setDateRange(7); // Default to last 7 days
+            setDateRange(7, 'btnLast7'); // Default to last 7 days
         });
     </script>
 </body>
