@@ -4,69 +4,42 @@ A Spring Boot application for analyzing Strava activities with comprehensive sta
 
 ## Quickstart
 
-Get up and running in 5 minutes:
-
 1. **Create a Strava API application**
    - Go to https://www.strava.com/settings/api
-   - Create a new application with callback domain: `localhost`
+   - Create application with callback domain: `localhost`
    - Note your Client ID and Client Secret
 
-2. **Set up credentials (local profile)**
-   Use the provided template. `quickstart.sh` will look for credentials in this order:
-   1) `src/main/resources/application-local.properties` (preferred)
-   2) Environment variables (`STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`)
+2. **Configure credentials**
    ```bash
-   # 2a) Create a local profile config from the template
    cp src/main/resources/application.properties src/main/resources/application-local.properties
-
-   # 2b) Option A — set credentials in application-local.properties (preferred)
-   # Open the file and set the Spring OAuth properties, for example:
-   # spring.security.oauth2.client.registration.strava.client-id=your-client-id
-   # spring.security.oauth2.client.registration.strava.client-secret=your-client-secret
-
-   # 2c) Option B — use environment variables (fallback if properties are not set)
-   # export STRAVA_CLIENT_ID=your-client-id
-   # export STRAVA_CLIENT_SECRET=your-client-secret
+   # Edit application-local.properties and add your credentials
    ```
 
-   Notes:
-   - You can keep secrets in the properties file (preferred for local dev) or in env vars (useful for CI/temporary shells). The script will pick up whichever is available based on the precedence above.
-   - If you use environment variables only, you don’t have to edit the properties file; `application.properties` already contains `${STRAVA_CLIENT_ID}` and `${STRAVA_CLIENT_SECRET}` placeholders.
-   - Avoid committing real credentials to source control.
-
-3. **Run the application**
-   Fastest way:
+3. **Run** (opens http://localhost:8080 automatically)
    ```bash
    ./quickstart.sh
    ```
-   Or, via Gradle:
-   ```bash
-   ./gradlew bootRun -Dspring-boot.run.profiles=local
-   ```
 
-4. **Access the dashboard**
-   - Open http://localhost:8080
-   - Click "Connect with Strava"
-   - Authorize the application
-   - Start analyzing your activities!
+4. **Connect with Strava and start analyzing!**
 
-> **Note:** Requires Java 21. For detailed setup instructions, see [SETUP.md](SETUP.md).
+> Requires Java 21. See [SETUP.md](SETUP.md) for detailed instructions.
 
 ## Features
 
 - **Secure Strava OAuth Authentication** - Login with your Strava account
-- **Activity Count Distribution** - Pie chart showing activity types with counts and percentages
-- **Time Distribution** - Visualize time spent per activity type in HH:MM format
-- **Streaks (toggleable)** - One tab with a toggle to switch between:
-  - **All Activities** (formerly Workout Heatmap): grid heatmap of any-activity days with streak counters and gap details
-  - **Running** (formerly Running Heatmap): calendar-like daily mileage heatmap with running streak counters
+- **Activity Count** - Pie chart showing activity types with counts and percentages
+- **Duration** - Visualize time spent per activity type in HH:MM format
+- **Heatmap** - Toggle between:
+  - **All Activities**: grid heatmap of any-activity days with streak counters and gap details
+  - **Running**: calendar-like daily mileage heatmap with running streak counters
+- **Trends** - Daily/Weekly/Monthly charts with smooth curves for:
+  - Running mileage with tooltips
+  - Average pace in MM:SS format
 - **Running Stats** - Comprehensive running metrics including:
   - Total runs and 10K+ runs count
   - Total miles and average pace
   - Run distance distribution histogram (0-10 miles in 1-mile ranges)
   - Personal records (fastest mile, fastest 10K, longest run, most elevation)
-- **Mileage Trend** - Daily/Weekly/Monthly running mileage charts with smooth curves and tooltips
-- **Pace Trend** - Daily/Weekly/Monthly average pace displayed in MM:SS format
 - **Date Range Filtering** - Quick pick buttons (7 days, 30 days, 90 days, 6 months, 1 year, YTD, All Time) and custom date range selection
 
 ## Screenshots
