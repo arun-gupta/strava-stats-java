@@ -73,7 +73,6 @@
                     </svg>
                 </a>
                 <img th:if="${profile}" th:src="${profile}" alt="Athlete" class="rounded-circle me-3" width="40" height="40" style="border: 2px solid white;">
-                <span class="navbar-text text-white me-3" th:if="${name}" th:text="${name}"></span>
                 <form method="post" action="/logout" class="d-inline">
                     <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
                 </form>
