@@ -52,36 +52,44 @@ A Spring Boot application for analyzing Strava activities with comprehensive sta
 
 Click on any thumbnail to view the full image:
 
-<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-  <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
-    <strong>Overview</strong><br>
-    <a href="docs/images/overview.png"><img src="docs/images/overview.png" alt="Overview" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
-  </div>
-  <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
-    <strong>Duration</strong><br>
-    <a href="docs/images/duration.png"><img src="docs/images/duration.png" alt="Duration" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
-  </div>
-  <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
-    <strong>Heatmap - All Activities</strong><br>
-    <a href="docs/images/heatmap-activity.png"><img src="docs/images/heatmap-activity.png" alt="Heatmap - All Activities" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
-  </div>
-  <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
-    <strong>Heatmap - Running</strong><br>
-    <a href="docs/images/heatmap-running.png"><img src="docs/images/heatmap-running.png" alt="Heatmap - Running" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
-  </div>
-  <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
-    <strong>Trends - Mileage</strong><br>
-    <a href="docs/images/trend-mileage.png"><img src="docs/images/trend-mileage.png" alt="Trends - Mileage" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
-  </div>
-  <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
-    <strong>Trends - Pace</strong><br>
-    <a href="docs/images/trend-pace.png"><img src="docs/images/trend-pace.png" alt="Trends - Pace" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
-  </div>
-  <div style="flex: 0 0 calc(33.333% - 14px); min-width: 250px; text-align: center;">
-    <strong>Running Stats</strong><br>
-    <a href="docs/images/running-stats.png"><img src="docs/images/running-stats.png" alt="Running Stats" style="width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;"></a>
-  </div>
-</div>
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <strong>Overview</strong><br>
+      <a href="docs/images/overview.png"><img src="docs/images/overview.png" alt="Overview" width="300"></a>
+    </td>
+    <td align="center" width="33%">
+      <strong>Duration</strong><br>
+      <a href="docs/images/duration.png"><img src="docs/images/duration.png" alt="Duration" width="300"></a>
+    </td>
+    <td align="center" width="33%">
+      <strong>Heatmap - All Activities</strong><br>
+      <a href="docs/images/heatmap-activity.png"><img src="docs/images/heatmap-activity.png" alt="Heatmap - All Activities" width="300"></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      <strong>Heatmap - Running</strong><br>
+      <a href="docs/images/heatmap-running.png"><img src="docs/images/heatmap-running.png" alt="Heatmap - Running" width="300"></a>
+    </td>
+    <td align="center" width="33%">
+      <strong>Trends - Mileage</strong><br>
+      <a href="docs/images/trend-mileage.png"><img src="docs/images/trend-mileage.png" alt="Trends - Mileage" width="300"></a>
+    </td>
+    <td align="center" width="33%">
+      <strong>Trends - Pace</strong><br>
+      <a href="docs/images/trend-pace.png"><img src="docs/images/trend-pace.png" alt="Trends - Pace" width="300"></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      <strong>Running Stats</strong><br>
+      <a href="docs/images/running-stats.png"><img src="docs/images/running-stats.png" alt="Running Stats" width="300"></a>
+    </td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
 
 ## Documentation
 
