@@ -1129,8 +1129,9 @@
         }
 
         function setDateRange(days, btnId) {
+            // Use local date to avoid timezone issues
             const today = new Date();
-            const endDate = today.toISOString().split('T')[0];
+            const endDate = formatLocalDate(today);
 
             if (days === 0) {
                 // All time - clear dates to show all data
@@ -1141,7 +1142,7 @@
                 const startDate = new Date(today);
                 const offset = Math.max(0, (days - 1));
                 startDate.setDate(startDate.getDate() - offset);
-                document.getElementById('afterDate').value = startDate.toISOString().split('T')[0];
+                document.getElementById('afterDate').value = formatLocalDate(startDate);
                 document.getElementById('beforeDate').value = endDate;
             }
 
@@ -1154,10 +1155,18 @@
             loadAllData();
         }
 
+        function formatLocalDate(date) {
+            // Format date in local timezone as YYYY-MM-DD
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         function setDateRangeYTD(btnId) {
             const today = new Date();
-            const endDate = today.toISOString().split('T')[0];
-            // Set start date to January 1st of the current year (format as YYYY-MM-DD to avoid timezone issues)
+            const endDate = formatLocalDate(today);
+            // Set start date to January 1st of the current year
             const year = today.getFullYear();
             const startDate = `${year}-01-01`;
             document.getElementById('afterDate').value = startDate;
