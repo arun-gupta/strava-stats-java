@@ -23,6 +23,7 @@ public class HomeController {
         if (principal != null) {
             model.addAttribute("name", principal.getAttribute("firstname") + " " + principal.getAttribute("lastname"));
             model.addAttribute("username", principal.getAttribute("username"));
+            model.addAttribute("profile", principal.getAttribute("profile"));
         }
         return "dashboard";
     }
