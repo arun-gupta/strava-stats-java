@@ -64,7 +64,7 @@ Click on any thumbnail to view the full image:
     </td>
     <td align="center" width="33%">
       <strong>Heatmap - All Activities</strong><br>
-      <a href="docs/images/heatmap-activity.png"><img src="docs/images/heatmap-activity.png" alt="Heatmap - All Activities" width="300"></a>
+      <a href="docs/images/heatmap-all.png"><img src="docs/images/heatmap-all.png" alt="Heatmap - All Activities" width="300"></a>
     </td>
   </tr>
   <tr>
@@ -73,21 +73,13 @@ Click on any thumbnail to view the full image:
       <a href="docs/images/heatmap-running.png"><img src="docs/images/heatmap-running.png" alt="Heatmap - Running" width="300"></a>
     </td>
     <td align="center" width="33%">
-      <strong>Trends - Mileage</strong><br>
-      <a href="docs/images/trend-mileage.png"><img src="docs/images/trend-mileage.png" alt="Trends - Mileage" width="300"></a>
+      <strong>Trends</strong><br>
+      <a href="docs/images/trends.png"><img src="docs/images/trends.png" alt="Trends" width="300"></a>
     </td>
-    <td align="center" width="33%">
-      <strong>Trends - Pace</strong><br>
-      <a href="docs/images/trend-pace.png"><img src="docs/images/trend-pace.png" alt="Trends - Pace" width="300"></a>
-    </td>
-  </tr>
-  <tr>
     <td align="center" width="33%">
       <strong>Running Stats</strong><br>
       <a href="docs/images/running-stats.png"><img src="docs/images/running-stats.png" alt="Running Stats" width="300"></a>
     </td>
-    <td></td>
-    <td></td>
   </tr>
 </table>
 
