@@ -47,12 +47,12 @@ public class StravaApiService {
 
         OAuth2AccessToken accessToken = client.getAccessToken();
 
-        ZoneId timezone = ZoneId.systemDefault();
-        long afterEpoch = after != null ? after.atStartOfDay(timezone).toEpochSecond() : 0;
-        // Strava's 'before' parameter is exclusive, so use end of day in user's timezone + 1 second
-        // This ensures all activities on the 'before' date are included, regardless of timezone
+        // Use UTC for API parameters, but we'll filter based on startDateLocal after fetching
+        // Add buffer of 1 day on each side to account for timezone differences
+        ZoneId utc = ZoneId.of("UTC");
+        long afterEpoch = after != null ? after.minusDays(1).atStartOfDay(utc).toEpochSecond() : 0;
         long beforeEpoch = before != null
-            ? before.atTime(LocalTime.MAX).atZone(timezone).toEpochSecond() + 1
+            ? before.plusDays(1).atTime(LocalTime.MAX).atZone(utc).toEpochSecond() + 1
             : System.currentTimeMillis() / 1000;
 
         return webClient.get()
@@ -84,36 +84,45 @@ public class StravaApiService {
         LocalDate currentBefore = before;
         int maxIterations = 50; // Safety limit to prevent infinite loops
         int iteration = 0;
-        
+
         while (iteration < maxIterations) {
             List<StravaActivity> pageActivities = getActivities(principalName, after, currentBefore, perPage);
-            
+
             if (pageActivities == null || pageActivities.isEmpty()) {
                 break; // No more activities
             }
-            
+
             allActivities.addAll(pageActivities);
-            
+
             // If we got fewer than perPage activities, we've reached the end
             if (pageActivities.size() < perPage) {
                 break;
             }
-            
+
             // Get the oldest activity from this page (last in the list since it's reverse chronological)
             StravaActivity oldestActivity = pageActivities.get(pageActivities.size() - 1);
             LocalDate oldestActivityDate = oldestActivity.getStartDateLocal().toLocalDate();
-            
+
             // Check if we've reached the start of our date range
             if (after != null && (oldestActivityDate.isBefore(after) || oldestActivityDate.equals(after))) {
                 break; // We've reached or passed our start date
             }
-            
+
             // For the next iteration, set 'before' to one day before the oldest activity
             // This ensures we get the next batch of older activities
             currentBefore = oldestActivityDate.minusDays(1);
             iteration++;
         }
-        
-        return allActivities;
+
+        // Filter activities based on startDateLocal to ensure we only include activities
+        // that occurred within the specified date range in the athlete's local timezone
+        return allActivities.stream()
+            .filter(activity -> {
+                LocalDate activityDate = activity.getStartDateLocal().toLocalDate();
+                boolean afterCheck = after == null || !activityDate.isBefore(after);
+                boolean beforeCheck = before == null || !activityDate.isAfter(before);
+                return afterCheck && beforeCheck;
+            })
+            .toList();
     }
 }
